@@ -1,6 +1,6 @@
 import { BarChart3 } from "lucide-react";
-import Link from "next/link";
-
+import Link from "next/link"; 
+ 
 export function TopNav() {
   return (
     <nav className="fixed top-0 left-0 right-0 z-50 border-b border-slate-200 bg-white/90 backdrop-blur-xl">
