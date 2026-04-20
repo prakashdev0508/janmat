@@ -15,7 +15,7 @@ export function TopNav() {
         </div>
 
         <div className="hidden items-center gap-8 text-sm font-medium text-slate-600 md:flex">
-          <Link href="/Explore Leaders" className="transition-colors hover:text-teal-600">
+          <Link href="/regions" className="transition-colors hover:text-teal-600">
             Explore Leaders
           </Link>
           <Link href="/insights" className="transition-colors hover:text-teal-600">

@@ -60,9 +60,6 @@ export function AppNav({
           <Link href={insightsHref} className={linkClass("nav-stats")}>
             Insights
           </Link>
-          <Link href={regionsHref} className={linkClass("nav-regions")}>
-            Regions
-          </Link>
           <Link href={howItWorksHref} className={linkClass("nav-about")}>
             How It Works
           </Link>
