@@ -1,6 +1,7 @@
 import type { FooterGroup } from "../homeData";
 import { BarChart3, Send } from "lucide-react";
 import { FaInstagram, FaLinkedinIn, FaTwitter } from "react-icons/fa";
+import Link from "next/link";
 
 export function SiteFooter({ groups }: { groups: FooterGroup[] }) {
   return (
@@ -40,9 +41,9 @@ export function SiteFooter({ groups }: { groups: FooterGroup[] }) {
               <ul className="space-y-4 text-sm font-semibold text-slate-500">
                 {group.links.map((link) => (
                   <li key={link.label}>
-                    <a href={link.href} className="transition-colors hover:text-teal-600">
+                    <Link href={link.href} className="transition-colors hover:text-teal-600">
                       {link.label}
-                    </a>
+                    </Link>
                   </li>
                 ))}
               </ul>
@@ -70,12 +71,12 @@ export function SiteFooter({ groups }: { groups: FooterGroup[] }) {
         <div className="flex flex-col items-center justify-between gap-4 border-t border-slate-100 pt-8 text-xs font-bold tracking-wider text-slate-400 uppercase md:flex-row">
           <p>© 2024 JanMat Platforms. Independent & Non-Official.</p>
           <div className="flex gap-6">
-            <a href="#" className="transition-colors hover:text-slate-900">
+            <Link href="#" className="transition-colors hover:text-slate-900">
               Terms of Service
-            </a>
-            <a href="#" className="transition-colors hover:text-slate-900">
+            </Link>
+            <Link href="#" className="transition-colors hover:text-slate-900">
               Cookie Settings
-            </a>
+            </Link>
           </div>
         </div>
       </div>

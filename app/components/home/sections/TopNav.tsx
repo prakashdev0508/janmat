@@ -1,4 +1,5 @@
 import { BarChart3 } from "lucide-react";
+import Link from "next/link";
 
 export function TopNav() {
   return (
@@ -14,24 +15,24 @@ export function TopNav() {
         </div>
 
         <div className="hidden items-center gap-8 text-sm font-medium text-slate-600 md:flex">
-          <a href="#" className="transition-colors hover:text-teal-600">
+          <Link href="/" className="transition-colors hover:text-teal-600">
             Explore Leaders
-          </a>
-          <a href="#" className="transition-colors hover:text-teal-600">
+          </Link>
+          <Link href="/insights" className="transition-colors hover:text-teal-600">
             Insights
-          </a>
-          <a href="#" className="transition-colors hover:text-teal-600">
-            Regions
-          </a>
-          <a href="#" className="transition-colors hover:text-teal-600">
-            How It Works
-          </a>
+          </Link>
+          <Link href="/compare" className="transition-colors hover:text-teal-600">
+            Comparison
+          </Link>
         </div>
 
         <div className="flex items-center gap-4">
-          <button className="rounded-full border border-slate-200 bg-slate-100 px-5 py-2.5 text-sm font-semibold text-slate-700 transition-all hover:bg-slate-200">
-            Login
-          </button>
+          <Link
+            href="/dashboard"
+            className="rounded-full border border-slate-200 bg-slate-100 px-5 py-2.5 text-sm font-semibold text-slate-700 transition-all hover:bg-slate-200"
+          >
+            Dashboard
+          </Link>
           <button className="rounded-full bg-teal-600 px-5 py-2.5 text-sm font-semibold text-white transition-all hover:bg-teal-700">
             Get Started
           </button>

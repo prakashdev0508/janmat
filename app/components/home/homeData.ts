@@ -105,10 +105,10 @@ export const footerGroups: FooterGroup[] = [
   {
     title: "Platform",
     links: [
-      { label: "Explore Trends", href: "#" },
-      { label: "Voting Rules", href: "#" },
+      { label: "Explore Trends", href: "/" },
+      { label: "Voting Rules", href: "/dashboard" },
       { label: "Identity Verification", href: "#" },
-      { label: "Public API", href: "#" },
+      { label: "Public API", href: "/insights" },
     ],
   },
   {

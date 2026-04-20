@@ -46,6 +46,20 @@ body {
   animation: pulse 2s infinite;
 }
 
+.streak-active {
+  background: linear-gradient(135deg, #0d9488 0%, #10b981 100%);
+  color: #ffffff;
+}
+
+.hide-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+.hide-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
 @keyframes pulse {
   0% {
     transform: scale(0.95);
