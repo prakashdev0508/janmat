@@ -66,13 +66,13 @@ export function AppNav({
         </div>
 
         <div className="flex items-center gap-4">
-          <button
-            type="button"
+          <Link
+            href="/login"
             onClick={onLogin}
             className="rounded-full border border-slate-200 bg-slate-100 px-5 py-2.5 text-sm font-semibold text-slate-700 transition-all hover:bg-slate-200"
           >
             Login
-          </button>
+          </Link>
           <button
             type="button"
             onClick={onGetStarted}

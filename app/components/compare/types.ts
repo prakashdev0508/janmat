@@ -1,8 +1,11 @@
-export type ComparisonStatusLevel = "low" | "medium" | "high";
+export interface ComparisonBreadcrumb {
+  label: string;
+  href?: string;
+}
 
-export interface TrendPoint {
-  x: number;
-  y: number;
+export interface LeaderSelectorField {
+  label: string;
+  placeholder: string;
 }
 
 export interface ComparedLeader {
@@ -10,28 +13,55 @@ export interface ComparedLeader {
   name: string;
   role: string;
   party: string;
-  profileType: string;
   avatarUrl: string;
   sentiment: number;
   sentimentDelta: string;
-  dailyVolume: string;
-  stronghold: string;
-  trendLabel: string;
-  trendPoints: TrendPoint[];
-  isLeader?: boolean;
+  buttonLabel: string;
+  buttonVariant: "primary" | "secondary";
+  partyColor: "orange" | "blue";
 }
 
-export interface ComparisonMetricRowValue {
-  value: string;
-  status?: ComparisonStatusLevel;
+export interface TrendSeries {
+  label: string;
+  momentumLabel: string;
+  bars: number[];
 }
 
-export interface ComparisonMetricRow {
-  parameter: string;
-  values: ComparisonMetricRowValue[];
+export interface RegionalPerformanceRow {
+  region: string;
+  leaderOneVotes: string;
+  leaderOneShare: number;
+  leaderTwoVotes: string;
+  leaderTwoShare: number;
+}
+
+export interface SentimentBreakdown {
+  leaderId: string;
+  approval: number;
+  note: string;
+}
+
+export interface KeyMetricRow {
+  label: string;
+  leaderOneValue: string;
+  badge: string;
+  leaderTwoValue: string;
+}
+
+export interface OtherComparisonCard {
+  title: string;
+  leaderOneAvatar: string;
+  leaderTwoAvatar: string;
 }
 
 export interface ComparisonPageData {
+  breadcrumbs: ComparisonBreadcrumb[];
+  selectorFields: LeaderSelectorField[];
+  popularComparisons: string[];
   leaders: ComparedLeader[];
-  metricRows: ComparisonMetricRow[];
+  trendSeries: TrendSeries[];
+  regionalPerformance: RegionalPerformanceRow[];
+  sentimentBreakdowns: SentimentBreakdown[];
+  keyMetrics: KeyMetricRow[];
+  otherComparisons: OtherComparisonCard[];
 }

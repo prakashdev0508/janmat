@@ -1,122 +1,55 @@
 import Image from "next/image";
-import Link from "next/link";
-import { ArrowDownRight, ArrowUpRight } from "lucide-react";
+import { TrendingUp } from "lucide-react";
 import type { ComparedLeader } from "../types";
 
 type LeaderComparisonColumnProps = {
   leader: ComparedLeader;
 };
 
-function buildTrendPath(points: ComparedLeader["trendPoints"]) {
-  return points
-    .map((point, index) => `${index === 0 ? "M" : "L"} ${point.x} ${point.y}`)
-    .join(" ");
-}
-
 export function LeaderComparisonColumn({ leader }: LeaderComparisonColumnProps) {
-  const isPositive = leader.sentimentDelta.startsWith("+");
-  const TrendIcon = isPositive ? ArrowUpRight : ArrowDownRight;
+  const partyClass =
+    leader.partyColor === "orange"
+      ? "bg-orange-100 text-orange-700"
+      : "bg-blue-100 text-blue-700";
+  const actionClass =
+    leader.buttonVariant === "primary"
+      ? "bg-teal-600 text-white hover:bg-teal-700 shadow-xl shadow-teal-600/20"
+      : "border-2 border-slate-200 bg-white text-slate-700 hover:border-teal-500 hover:text-teal-600";
 
   return (
-    <article className="glass-card flex flex-col overflow-hidden rounded-[40px]">
-      <div className="border-b border-slate-100 bg-slate-50 p-8 pb-6">
-        <div className="mb-6 flex items-start justify-between gap-4">
-          <div className="h-24 w-24 overflow-hidden rounded-[32px] bg-white ring-4 ring-teal-100">
-            <Image
-              src={leader.avatarUrl}
-              alt={leader.name}
-              width={96}
-              height={96}
-              className="h-full w-full object-cover"
-              unoptimized
-            />
-          </div>
-          {leader.isLeader ? (
-            <div className="rounded-full bg-teal-600 px-4 py-1.5 text-[10px] font-bold tracking-widest text-white uppercase">
-              Sentiment Leader
-            </div>
-          ) : null}
+    <article className="glass-card relative overflow-hidden rounded-[40px] p-8">
+      <div className="absolute top-0 right-0 h-32 w-32 -translate-y-1/2 translate-x-1/2 rounded-full bg-teal-50 opacity-60 blur-2xl" />
+      <div className="relative z-10 flex flex-col items-center text-center">
+        <div className="mb-6 h-40 w-40 overflow-hidden rounded-full border-8 border-slate-50 shadow-2xl transition-transform duration-500 group-hover:scale-105">
+          <Image
+            src={leader.avatarUrl}
+            alt={leader.name}
+            width={160}
+            height={160}
+            className="h-full w-full object-cover"
+            unoptimized
+          />
         </div>
-        <h2 className="text-2xl font-bold text-slate-900">{leader.name}</h2>
-        <p className="mb-1 font-medium text-slate-500">
-          {leader.role} | {leader.party}
-        </p>
-        <p className="text-sm text-slate-400">{leader.profileType}</p>
-      </div>
-
-      <div className="flex flex-1 flex-col gap-10 p-8">
-        <div className="space-y-3">
-          <p className="text-xs font-bold tracking-wider text-slate-400 uppercase">
-            Popularity
-          </p>
-          <div className="flex items-end justify-between">
-            <span className="text-5xl font-black text-slate-900">
-              {leader.sentiment}
-              <span className="text-2xl">%</span>
-            </span>
-            <span
-              className={`inline-flex items-center gap-1 rounded-full px-3 py-1 text-xs font-bold ${
-                isPositive
-                  ? "bg-emerald-50 text-emerald-700"
-                  : "bg-red-50 text-red-700"
-              }`}
-            >
-              <TrendIcon className="h-4 w-4" />
-              {leader.sentimentDelta}
-            </span>
-          </div>
-          <div className="h-2 w-full overflow-hidden rounded-full bg-slate-100">
-            <div
-              className="h-full rounded-full bg-teal-500"
-              style={{ width: `${leader.sentiment}%` }}
-            />
-          </div>
-        </div>
-
-        <div>
-          <p className="mb-2 text-xs font-bold tracking-wider text-slate-400 uppercase">
-            Daily Volume
-          </p>
-          <p className="text-2xl font-bold text-slate-900">{leader.dailyVolume}</p>
-          <p className="text-sm font-medium text-slate-500">Votes in last 24 hours</p>
-        </div>
-
-        <div>
-          <p className="mb-2 text-xs font-bold tracking-wider text-slate-400 uppercase">
-            Stronghold
-          </p>
-          <div className="inline-block rounded-full border border-teal-100 bg-teal-50 px-4 py-2 text-sm font-bold text-teal-700">
-            {leader.stronghold}
-          </div>
-        </div>
-
-        <div>
-          <p className="mb-2 text-xs font-bold tracking-wider text-slate-400 uppercase">
-            Trend
-          </p>
-          <div className="rounded-2xl border border-slate-100 bg-slate-50 p-3">
-            <svg viewBox="0 0 100 80" className="h-16 w-full">
-              <path
-                d={buildTrendPath(leader.trendPoints)}
-                fill="none"
-                stroke="#0d9488"
-                strokeWidth="3"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-            </svg>
-            <p className="mt-2 text-xs font-semibold text-slate-500">{leader.trendLabel}</p>
-          </div>
-        </div>
-      </div>
-
-      <div className="p-8 pt-0">
-        <Link
-          href={`/leaders/${leader.id}`}
-          className="block w-full rounded-2xl bg-teal-600 py-3 text-center text-sm font-bold text-white transition-all hover:bg-teal-700"
+        <span
+          className={`mb-3 rounded-full px-4 py-1.5 text-xs font-black tracking-widest uppercase ${partyClass}`}
         >
-          Full Profile
-        </Link>
+          {leader.party}
+        </span>
+        <h2 className="mb-1 text-3xl font-bold text-slate-900">{leader.name}</h2>
+        <p className="mb-6 text-sm font-bold text-slate-500">{leader.role}</p>
+        <div className="flex items-end gap-3">
+          <span className="text-5xl font-bold tracking-tighter text-teal-600">{leader.sentiment}%</span>
+          <div className="mb-1 flex items-center gap-1 text-sm font-black text-emerald-500">
+            <TrendingUp className="h-4 w-4" />
+            <span>{leader.sentimentDelta}</span>
+          </div>
+        </div>
+        <button
+          type="button"
+          className={`mt-8 w-full max-w-xs rounded-2xl py-4 text-lg font-bold transition-all active:scale-95 ${actionClass}`}
+        >
+          {leader.buttonLabel}
+        </button>
       </div>
     </article>
   );
