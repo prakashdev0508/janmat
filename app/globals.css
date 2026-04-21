@@ -60,6 +60,16 @@ body {
   scrollbar-width: none;
 }
 
+.bg-teal-gradient {
+  background: linear-gradient(135deg, #e0f2f1 0%, #ffffff 100%);
+}
+
+.input-focus-teal:focus {
+  border-color: #0d9488;
+  box-shadow: 0 0 0 2px rgb(13 148 136 / 0.1);
+  outline: none;
+}
+
 @keyframes pulse {
   0% {
     transform: scale(0.95);

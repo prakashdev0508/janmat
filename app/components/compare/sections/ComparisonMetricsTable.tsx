@@ -1,72 +1,33 @@
-import type { ComparedLeader, ComparisonMetricRow } from "../types";
+import type { KeyMetricRow } from "../types";
 
 type ComparisonMetricsTableProps = {
-  leaders: ComparedLeader[];
-  metricRows: ComparisonMetricRow[];
+  metricRows: KeyMetricRow[];
 };
 
-const statusClassMap = {
-  low: "bg-emerald-50 text-emerald-700",
-  medium: "bg-amber-50 text-amber-700",
-  high: "bg-red-50 text-red-700",
-} as const;
-
-export function ComparisonMetricsTable({
-  leaders,
-  metricRows,
-}: ComparisonMetricsTableProps) {
+export function ComparisonMetricsTable({ metricRows }: ComparisonMetricsTableProps) {
   return (
-    <section className="border-t border-slate-100 bg-white px-6 py-24">
-      <div className="mx-auto max-w-7xl">
-        <h2 className="mb-8 text-2xl font-bold text-slate-900">
-          Synchronized Historical Metrics
-        </h2>
-        <div className="overflow-x-auto">
-          <table className="w-full border-collapse">
-            <thead>
-              <tr className="border-b border-slate-100">
-                <th className="px-4 py-6 text-left text-sm font-bold tracking-wider text-slate-400 uppercase">
-                  Parameter
-                </th>
-                {leaders.map((leader, index) => (
-                  <th
-                    key={leader.id}
-                    className={`px-4 py-6 text-left text-sm font-bold tracking-wider uppercase ${
-                      index === 0 ? "text-teal-600" : "text-slate-500"
-                    }`}
-                  >
-                    {leader.name}
-                  </th>
-                ))}
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-slate-50">
-              {metricRows.map((row) => (
-                <tr key={row.parameter}>
-                  <td className="px-4 py-6 font-bold text-slate-700">
-                    {row.parameter}
-                  </td>
-                  {row.values.map((value, index) => (
-                    <td key={`${row.parameter}-${leaders[index]?.id}`} className="px-4 py-6">
-                      {value.status ? (
-                        <span
-                          className={`rounded-full px-3 py-1 text-xs font-bold ${
-                            statusClassMap[value.status]
-                          }`}
-                        >
-                          {value.value}
-                        </span>
-                      ) : (
-                        <span className="font-medium text-slate-900">{value.value}</span>
-                      )}
-                    </td>
-                  ))}
-                </tr>
-              ))}
-            </tbody>
-          </table>
+    <div className="space-y-4">
+      {metricRows.map((row) => (
+        <div
+          key={row.label}
+          className="grid grid-cols-1 items-center gap-4 rounded-2xl border border-slate-100 bg-white p-4 shadow-sm md:grid-cols-12"
+        >
+          <div className="text-sm font-bold tracking-widest text-slate-500 uppercase md:col-span-4">
+            {row.label}
+          </div>
+          <div className="text-lg font-black text-teal-600 md:col-span-3 md:text-center">
+            {row.leaderOneValue}
+          </div>
+          <div className="md:col-span-2 md:text-center">
+            <span className="rounded-full bg-teal-50 px-3 py-1 text-xs font-bold text-teal-700 uppercase">
+              {row.badge}
+            </span>
+          </div>
+          <div className="text-lg font-bold text-slate-400 md:col-span-3 md:text-center">
+            {row.leaderTwoValue}
+          </div>
         </div>
-      </div>
-    </section>
+      ))}
+    </div>
   );
 }
