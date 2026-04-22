@@ -25,16 +25,15 @@ const activeLinkByLegacyKey: Record<
 
 export function AppNav({
   activeLink,
-  exploreHref = "/",
+  exploreHref = "/regions",
   insightsHref = "/insights",
-  regionsHref = "/regions",
   howItWorksHref = "/#how-it-works",
   onLogin,
   onGetStarted,
   active,
 }: AppNavProps) {
   const resolvedActiveLink =
-    activeLink ?? (active ? activeLinkByLegacyKey[active] : "nav-explore");
+    activeLink ?? (active ? activeLinkByLegacyKey[active] : "nav-regions");
 
   const linkClass = (key: NonNullable<AppNavProps["activeLink"]>) =>
     key === resolvedActiveLink
@@ -54,7 +53,7 @@ export function AppNav({
         </Link>
 
         <div className="hidden items-center gap-8 text-sm font-medium md:flex">
-          <Link href={exploreHref} className={linkClass("nav-explore")}>
+          <Link href={exploreHref} className={linkClass("nav-regions")}>
             Explore Leaders
           </Link>
           <Link href={insightsHref} className={linkClass("nav-stats")}>

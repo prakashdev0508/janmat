@@ -2,11 +2,45 @@
 
 import { Code2, Lock, Mail, Eye, EyeOff, Vote } from "lucide-react";
 import Link from "next/link";
-import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { FormEvent, useState } from "react";
 import { loginLegalLinks, socialProviders } from "../loginData";
 
 export function LoginFormCard() {
+  const router = useRouter();
   const [showPassword, setShowPassword] = useState(false);
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    if (isSubmitting) return;
+
+    setIsSubmitting(true);
+    setError(null);
+    try {
+      const response = await fetch("/api/auth/login", {
+        method: "POST",
+        headers: {
+          "content-type": "application/json",
+        },
+        body: JSON.stringify({ email, password }),
+      });
+      const data = (await response.json()) as { error?: string };
+      if (!response.ok) {
+        setError(data.error ?? "Login failed.");
+        return;
+      }
+      router.push("/admin/user");
+      router.refresh();
+    } catch {
+      setError("Login failed. Please try again.");
+    } finally {
+      setIsSubmitting(false);
+    }
+  }
 
   return (
     <section className="flex flex-1 flex-col items-center justify-center p-6 sm:p-12 lg:p-24">
@@ -20,7 +54,7 @@ export function LoginFormCard() {
       </div>
 
       <div className="w-full max-w-md">
-        <div className="rounded-[2rem] border border-[#e2e8f0] bg-white p-8 shadow-xl sm:p-12">
+        <div className="rounded-4xl border border-[#e2e8f0] bg-white p-8 shadow-xl sm:p-12">
           <header className="mb-10 text-center lg:text-left">
             <h2 className="mb-2 text-3xl font-bold text-[#1e293b]">Login to JanMat</h2>
             <p className="text-[#64748b]">
@@ -31,7 +65,7 @@ export function LoginFormCard() {
             </p>
           </header>
 
-          <form className="space-y-6">
+          <form className="space-y-6" onSubmit={handleSubmit}>
             <div className="space-y-2">
               <label htmlFor="email" className="block text-sm font-bold text-[#334155]">
                 Email Address
@@ -45,6 +79,8 @@ export function LoginFormCard() {
                   id="email"
                   name="email"
                   placeholder="your@email.com"
+                  value={email}
+                  onChange={(event) => setEmail(event.target.value)}
                   className="input-focus-teal h-12 w-full rounded-xl border border-[#e2e8f0] bg-[#f8fafc] pr-4 pl-12 font-medium text-[#1e293b] transition-all"
                   required
                 />
@@ -69,6 +105,8 @@ export function LoginFormCard() {
                   id="password"
                   name="password"
                   placeholder="Enter your password"
+                  value={password}
+                  onChange={(event) => setPassword(event.target.value)}
                   className="input-focus-teal h-12 w-full rounded-xl border border-[#e2e8f0] bg-[#f8fafc] pr-12 pl-12 font-medium text-[#1e293b] transition-all"
                   required
                 />
@@ -114,11 +152,18 @@ export function LoginFormCard() {
               </label>
             </div>
 
+            {error ? (
+              <p className="rounded-lg border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-600">
+                {error}
+              </p>
+            ) : null}
+
             <button
               type="submit"
+              disabled={isSubmitting}
               className="flex h-12 w-full items-center justify-center gap-2 rounded-xl bg-[#0d9488] text-lg font-semibold text-white shadow-lg shadow-teal-500/20 transition-all hover:bg-[#065f46] active:scale-[0.98]"
             >
-              Login to Account
+              {isSubmitting ? "Logging in..." : "Login to Account"}
             </button>
           </form>
 
