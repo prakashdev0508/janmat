@@ -8,7 +8,7 @@ type LeaderPageProps = {
 
 export default async function LeaderRoutePage({ params }: LeaderPageProps) {
   const { leaderId } = await params;
-  const profile = getLeaderProfileData(leaderId);
+  const profile = await getLeaderProfileData(leaderId);
 
   if (!profile) {
     notFound();

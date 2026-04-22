@@ -1,12 +1,12 @@
 import { LayoutGrid, List } from "lucide-react";
 
-export function RegionalResultsToolbar() {
+export function RegionalResultsToolbar({ totalLeaders }: { totalLeaders: number }) {
   return (
     <div className="mb-8 flex items-center justify-between">
       <div className="flex items-center gap-4">
         <h2 className="text-2xl font-bold text-slate-900">Top Representatives</h2>
         <div className="rounded-full border border-teal-100 bg-teal-50 px-3 py-1 text-xs font-bold text-teal-600">
-          Real-time data
+          Real-time data ({totalLeaders})
         </div>
       </div>
       <div className="flex items-center gap-2">
