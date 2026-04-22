@@ -1,31 +1,31 @@
 import type { LeaderResult, PartyOption, RegionOption, SortOption } from "./types";
 
 export const regionOptions: RegionOption[] = [
-  { label: "All India", isActive: true },
-  { label: "Uttar Pradesh" },
-  { label: "Maharashtra" },
-  { label: "West Bengal" },
-  { label: "Tamil Nadu" },
-  { label: "Karnataka" },
-  { label: "Bihar" },
-  { label: "Gujarat" },
-  { label: "Rajasthan" },
+  { id: "all", label: "All India" },
+  { id: "uttar-pradesh", label: "Uttar Pradesh" },
+  { id: "maharashtra", label: "Maharashtra" },
+  { id: "west-bengal", label: "West Bengal" },
+  { id: "tamil-nadu", label: "Tamil Nadu" },
+  { id: "karnataka", label: "Karnataka" },
+  { id: "bihar", label: "Bihar" },
+  { id: "gujarat", label: "Gujarat" },
+  { id: "rajasthan", label: "Rajasthan" },
 ];
 
 export const partyOptions: PartyOption[] = [
-  { label: "BJP", checked: true },
-  { label: "INC" },
-  { label: "AITC" },
-  { label: "DMK" },
-  { label: "TDP" },
-  { label: "AAP" },
-  { label: "Others" },
+  { id: "bjp", label: "BJP" },
+  { id: "inc", label: "INC" },
+  { id: "aitc", label: "AITC" },
+  { id: "dmk", label: "DMK" },
+  { id: "tdp", label: "TDP" },
+  { id: "aap", label: "AAP" },
+  { id: "others", label: "Others" },
 ];
 
 export const sortOptions: SortOption[] = [
-  { label: "Popularity (High to Low)" },
-  { label: "Total Vote Count" },
-  { label: "Name (A-Z)" },
+  { id: "popularity_desc", label: "Popularity (High to Low)" },
+  { id: "votes_desc", label: "Total Vote Count" },
+  { id: "name_asc", label: "Name (A-Z)" },
 ];
 
 export const leaderResults: LeaderResult[] = [

@@ -3,9 +3,30 @@ import type { FeaturedVoteLeader } from "../types";
 
 type VoteHeroCardProps = {
   leader: FeaturedVoteLeader;
+  isLoading?: boolean;
 };
 
-export function VoteHeroCard({ leader }: VoteHeroCardProps) {
+export function VoteHeroCard({ leader, isLoading = false }: VoteHeroCardProps) {
+  if (isLoading) {
+    return (
+      <section className="mx-auto max-w-4xl px-6">
+        <div className="glass-card relative overflow-hidden rounded-[40px] p-8 md:p-12">
+          <div className="relative z-10">
+            <div className="mb-12 flex flex-col items-center gap-8 md:flex-row">
+              <div className="h-40 w-40 animate-pulse rounded-[40px] bg-slate-200 md:h-56 md:w-56" />
+              <div className="flex-1 space-y-4">
+                <div className="h-5 w-32 animate-pulse rounded-full bg-slate-200" />
+                <div className="h-10 w-64 animate-pulse rounded bg-slate-200" />
+                <div className="h-6 w-52 animate-pulse rounded bg-slate-200" />
+                <div className="h-4 w-full animate-pulse rounded-full bg-slate-200" />
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+    );
+  }
+
   return (
     <section className="mx-auto max-w-4xl px-6">
       <div className="glass-card relative overflow-hidden rounded-[40px] p-8 md:p-12">

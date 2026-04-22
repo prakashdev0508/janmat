@@ -1,114 +1,214 @@
+import { VoteType } from "@prisma/client";
+import { prisma } from "@/lib/prisma";
 import type { LeaderProfileData } from "./types";
 
-const baseRelatedLeaders = [
-  {
-    id: "rahul",
-    name: "Rahul Gandhi",
-    partyRegion: "INC | Wayanad",
-    popularity: 48.2,
-    avatarUrl: "https://api.dicebear.com/7.x/avataaars/svg?seed=Rahul",
-  },
-  {
-    id: "mamata",
-    name: "Mamata Banerjee",
-    partyRegion: "AITC | West Bengal",
-    popularity: 52.4,
-    avatarUrl: "https://api.dicebear.com/7.x/avataaars/svg?seed=Mamata",
-  },
-  {
-    id: "yogi",
-    name: "Yogi Adityanath",
-    partyRegion: "BJP | Uttar Pradesh",
-    popularity: 71.4,
-    avatarUrl: "https://api.dicebear.com/7.x/avataaars/svg?seed=Yogi",
-  },
-  {
-    id: "kejriwal",
-    name: "Arvind Kejriwal",
-    partyRegion: "AAP | Delhi",
-    popularity: 61.8,
-    avatarUrl: "https://api.dicebear.com/7.x/avataaars/svg?seed=Arvind",
-  },
-] as const;
+function formatNumber(value: number): string {
+  return new Intl.NumberFormat("en-IN").format(value);
+}
 
-export const leaderProfilesById: Record<string, LeaderProfileData> = {
-  modi: {
-    meta: {
-      id: "modi",
-      name: "Narendra Modi",
-      role: "Prime Minister of India",
-      party: "BJP",
-      location: "New Delhi, India",
-      website: "narendramodi.in",
-      twitter: "@narendramodi",
-      activeSince: "2001",
-      avatarUrl: "https://api.dicebear.com/7.x/avataaars/svg?seed=Narendra",
+function getTodayStart(): Date {
+  const date = new Date();
+  date.setHours(0, 0, 0, 0);
+  return date;
+}
+
+function getYesterdayStart(): Date {
+  const date = new Date();
+  date.setDate(date.getDate() - 1);
+  date.setHours(0, 0, 0, 0);
+  return date;
+}
+
+function calculateVoteStats(votes: Array<{ type: VoteType; createdAt: Date }>) {
+  const todayStart = getTodayStart();
+  const yesterdayStart = getYesterdayStart();
+  let upvotes = 0;
+  let downvotes = 0;
+  let votesToday = 0;
+  let yesterdayVotes = 0;
+
+  votes.forEach((vote) => {
+    if (vote.type === VoteType.UPVOTE) {
+      upvotes += 1;
+    } else {
+      downvotes += 1;
+    }
+
+    if (vote.createdAt >= todayStart) {
+      votesToday += 1;
+    } else if (vote.createdAt >= yesterdayStart && vote.createdAt < todayStart) {
+      yesterdayVotes += 1;
+    }
+  });
+
+  const totalVotes = upvotes + downvotes;
+  const popularity = totalVotes > 0 ? Number(((upvotes / totalVotes) * 100).toFixed(1)) : 0;
+  const changeBase = Math.max(yesterdayVotes, 1);
+  const delta = ((votesToday - yesterdayVotes) / changeBase) * 100;
+
+  return {
+    upvotes,
+    downvotes,
+    totalVotes,
+    popularity,
+    votesToday,
+    popularityDelta: `${delta >= 0 ? "+" : ""}${delta.toFixed(1)}%`,
+  };
+}
+
+export async function getLeaderProfileData(leaderId: string): Promise<LeaderProfileData | null> {
+  const leader = await prisma.leader.findUnique({
+    where: { id: leaderId },
+    include: {
+      party: true,
+      state: true,
+      votes: {
+        select: {
+          type: true,
+          createdAt: true,
+        },
+      },
     },
-    popularity: 72.8,
-    popularityDelta: "+2.4%",
+  });
+
+  if (!leader) {
+    return null;
+  }
+
+  const voteStats = calculateVoteStats(leader.votes);
+  const neutralPercentage = Math.max(0, Number((100 - voteStats.popularity).toFixed(1)));
+  const disapprovalPercentage = Number(
+    (
+      voteStats.totalVotes > 0 ? (voteStats.downvotes / voteStats.totalVotes) * 100 : 0
+    ).toFixed(1),
+  );
+
+  const relatedCandidates = await prisma.leader.findMany({
+    where: {
+      id: { not: leader.id },
+      stateId: leader.stateId ?? undefined,
+    },
+    include: {
+      party: true,
+      state: true,
+      votes: {
+        select: {
+          type: true,
+          createdAt: true,
+        },
+      },
+    },
+    take: 8,
+  });
+
+  const relatedLeaders = relatedCandidates
+    .map((candidate) => {
+      const metrics = calculateVoteStats(candidate.votes);
+      return {
+        id: candidate.id,
+        name: candidate.name,
+        partyRegion: `${candidate.party?.shortName || candidate.party?.name || "IND"} | ${
+          candidate.constituency || candidate.state?.name || "India"
+        }`,
+        popularity: metrics.popularity,
+        avatarUrl: `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(candidate.name)}`,
+      };
+    })
+    .sort((a, b) => b.popularity - a.popularity)
+    .slice(0, 4);
+
+  const regionalSentiment = [
+    {
+      state: leader.state?.name || "All India",
+      approval: voteStats.popularity,
+      deltaLabel: voteStats.popularityDelta,
+    },
+    ...relatedLeaders.slice(0, 3).map((related) => ({
+      state: related.partyRegion.split("|")[1]?.trim() || "India",
+      approval: related.popularity,
+      deltaLabel: "+0.0%",
+    })),
+  ].slice(0, 4);
+
+  const now = new Date();
+  const timeline = [
+    {
+      date: now.toLocaleDateString("en-US", { month: "short", day: "2-digit", year: "numeric" }),
+      title: "Daily Sentiment Update",
+      description: "Latest voting activity has been reflected in today's sentiment.",
+      impactLabel: `${voteStats.popularityDelta} Change`,
+      impactClass: voteStats.popularityDelta.startsWith("-")
+        ? "text-red-500"
+        : "text-emerald-600",
+    },
+    {
+      date: new Date(now.getTime() - 86400000).toLocaleDateString("en-US", {
+        month: "short",
+        day: "2-digit",
+        year: "numeric",
+      }),
+      title: "Regional Response Snapshot",
+      description: "Cross-region reactions updated from recent votes.",
+      impactLabel: "0.0% Stable",
+      impactClass: "text-slate-500",
+    },
+    {
+      date: new Date(now.getTime() - 2 * 86400000).toLocaleDateString("en-US", {
+        month: "short",
+        day: "2-digit",
+        year: "numeric",
+      }),
+      title: "Engagement Pulse",
+      description: "Leader engagement indicators were recalculated from total vote activity.",
+      impactLabel: `${voteStats.votesToday} Votes Today`,
+      impactClass: "text-emerald-600",
+    },
+  ];
+
+  const partyLabel = leader.party?.shortName || leader.party?.name || "IND";
+  const stateLabel = leader.state?.name || "India";
+
+  return {
+    meta: {
+      id: leader.id,
+      name: leader.name,
+      role: `${leader.type}${leader.constituency ? `, ${leader.constituency}` : ""}`,
+      party: partyLabel,
+      location: `${stateLabel}, India`,
+      website: "janmat.in",
+      twitter: `@${leader.name.toLowerCase().replace(/\s+/g, "")}`,
+      activeSince: String(leader.termStart?.getFullYear() ?? leader.createdAt.getFullYear()),
+      avatarUrl: `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(leader.name)}`,
+    },
+    popularity: voteStats.popularity,
+    popularityDelta: voteStats.popularityDelta,
     approvalBreakdown: [
       {
         label: "Approval",
-        value: 72.8,
-        votesLabel: "17.8M votes",
+        value: voteStats.popularity,
+        votesLabel: `${formatNumber(voteStats.upvotes)} votes`,
         colorClass: "bg-teal-500",
       },
       {
         label: "Disapproval",
-        value: 18.4,
-        votesLabel: "4.5M votes",
+        value: disapprovalPercentage,
+        votesLabel: `${formatNumber(voteStats.downvotes)} votes`,
         colorClass: "bg-orange-500",
       },
       {
         label: "Neutral",
-        value: 8.8,
-        votesLabel: "2.1M votes",
+        value: neutralPercentage,
+        votesLabel: "Derived",
         colorClass: "bg-slate-400",
       },
     ],
-    regionalSentiment: [
-      { state: "Uttar Pradesh", approval: 78.4, deltaLabel: "+1.2%" },
-      { state: "Gujarat", approval: 81.1, deltaLabel: "+0.9%" },
-      { state: "Maharashtra", approval: 66.3, deltaLabel: "-0.3%" },
-      { state: "West Bengal", approval: 41.6, deltaLabel: "+0.2%" },
-    ],
+    regionalSentiment,
     votingStats: [
-      { label: "Total Votes Today", value: "1,240,512" },
-      { label: "Approval Votes", value: "902,293" },
-      { label: "Disapproval Votes", value: "228,254" },
+      { label: "Total Votes Today", value: formatNumber(voteStats.votesToday) },
+      { label: "Approval Votes", value: formatNumber(voteStats.upvotes) },
+      { label: "Disapproval Votes", value: formatNumber(voteStats.downvotes) },
     ],
-    timeline: [
-      {
-        date: "Oct 14, 2024",
-        title: "Infrastructure Push",
-        description:
-          "New national highway project announcement improved urban sentiment.",
-        impactLabel: "+1.2% Rise",
-        impactClass: "text-emerald-600",
-      },
-      {
-        date: "Oct 08, 2024",
-        title: "Energy Subsidy Update",
-        description:
-          "Mixed reaction in rural states after revised subsidy allocation.",
-        impactLabel: "0.0% No Change",
-        impactClass: "text-slate-500",
-      },
-      {
-        date: "Oct 02, 2024",
-        title: "Import Tax Regulation",
-        description:
-          "Disapproval increased among trading communities after customs rules.",
-        impactLabel: "-0.8% Drop",
-        impactClass: "text-red-500",
-      },
-    ],
-    relatedLeaders: [...baseRelatedLeaders],
-  },
-};
-
-export const defaultLeaderProfileId = "modi";
-
-export function getLeaderProfileData(leaderId: string): LeaderProfileData | null {
-  return leaderProfilesById[leaderId] ?? null;
+    timeline,
+    relatedLeaders,
+  };
 }

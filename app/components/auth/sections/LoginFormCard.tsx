@@ -2,12 +2,13 @@
 
 import { Code2, Lock, Mail, Eye, EyeOff, Vote } from "lucide-react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { FormEvent, useState } from "react";
 import { loginLegalLinks, socialProviders } from "../loginData";
 
 export function LoginFormCard() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [showPassword, setShowPassword] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -33,7 +34,8 @@ export function LoginFormCard() {
         setError(data.error ?? "Login failed.");
         return;
       }
-      router.push("/admin/user");
+      const redirectTo = searchParams.get("redirect") || "/admin/user";
+      router.push(redirectTo);
       router.refresh();
     } catch {
       setError("Login failed. Please try again.");

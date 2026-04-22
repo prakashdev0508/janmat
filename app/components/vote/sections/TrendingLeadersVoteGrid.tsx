@@ -4,9 +4,13 @@ import { VoteLeaderCard } from "../VoteLeaderCard";
 
 type TrendingLeadersVoteGridProps = {
   leaders: TrendingVoteLeader[];
+  isLoading?: boolean;
 };
 
-export function TrendingLeadersVoteGrid({ leaders }: TrendingLeadersVoteGridProps) {
+export function TrendingLeadersVoteGrid({
+  leaders,
+  isLoading = false,
+}: TrendingLeadersVoteGridProps) {
   return (
     <section className="mx-auto mt-20 max-w-7xl px-6">
       <div className="mb-8 flex items-end justify-between">
@@ -25,9 +29,14 @@ export function TrendingLeadersVoteGrid({ leaders }: TrendingLeadersVoteGridProp
       </div>
 
       <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-4">
-        {leaders.map((leader) => (
-          <VoteLeaderCard key={leader.id} leader={leader} />
-        ))}
+        {isLoading
+          ? Array.from({ length: 4 }).map((_, index) => (
+              <div
+                key={`trending-skeleton-${index}`}
+                className="glass-card h-64 animate-pulse rounded-3xl bg-slate-200/60"
+              />
+            ))
+          : leaders.map((leader) => <VoteLeaderCard key={leader.id} leader={leader} />)}
       </div>
     </section>
   );

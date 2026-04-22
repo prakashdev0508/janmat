@@ -27,20 +27,40 @@ const NAME_ALIASES = [
   "mpname",
   "nameofmla",
   "nameofmp",
+  "membername",
+  "memberofparliament",
+  "mp",
 ];
-const PARTY_ALIASES = ["party", "partyname", "party_name"];
+const PARTY_ALIASES = [
+  "party",
+  "partyname",
+  "party_name",
+  "partyaffiliation",
+  "politicalparty",
+];
 const PARTY_SHORT_NAME_ALIASES = ["partyshortname", "party_short_name"];
-const STATE_ALIASES = ["state", "statename", "state_name"];
+const STATE_ALIASES = ["state", "statename", "state_name", "stateut", "stateorut"];
 const DISTRICT_ALIASES = ["district", "districtname", "district_name"];
 const GENDER_ALIASES = ["gender"];
 const AGE_ALIASES = ["age"];
 const EDUCATION_ALIASES = ["education"];
-const CONSTITUENCY_ALIASES = ["constituency"];
+const CONSTITUENCY_ALIASES = [
+  "constituency",
+  "constituencyname",
+  "parliamentaryconstituency",
+  "pcname",
+  "constituencynoandname",
+];
 const TERM_START_ALIASES = ["termstart", "term_start"];
 const TERM_END_ALIASES = ["termend", "term_end"];
-const DEBATES_ALIASES = ["debates"];
-const QUESTIONS_ALIASES = ["questions"];
-const ATTENDANCE_ALIASES = ["attendance"];
+const DEBATES_ALIASES = ["debates", "numberofdebates", "debatesparticipated", "noofdebates"];
+const QUESTIONS_ALIASES = [
+  "questions",
+  "questionsasked",
+  "numberofquestions",
+  "noofquestions",
+];
+const ATTENDANCE_ALIASES = ["attendance", "attendancepercentage", "attendancepercent"];
 
 function normalizeHeader(value: string): string {
   return value.trim().toLowerCase().replace(/[\s_-]+/g, "");
@@ -122,6 +142,34 @@ function getValue(row: CsvRow, aliases: string[]): string | undefined {
     }
   }
   return undefined;
+}
+
+function findHeaderByHints(headers: string[], hints: string[]): string | undefined {
+  const normalizedHeaders = headers.map(normalizeHeader);
+  for (let index = 0; index < normalizedHeaders.length; index += 1) {
+    const header = normalizedHeaders[index];
+    if (hints.some((hint) => header.includes(hint))) {
+      return headers[index];
+    }
+  }
+  return undefined;
+}
+
+function getValueWithHints(
+  row: CsvRow,
+  aliases: string[],
+  hints: string[],
+): string | undefined {
+  const directValue = getValue(row, aliases);
+  if (directValue) {
+    return directValue;
+  }
+  const hintedHeader = findHeaderByHints(Object.keys(row), hints);
+  if (!hintedHeader) {
+    return undefined;
+  }
+  const hintedValue = row[hintedHeader];
+  return hintedValue?.trim();
 }
 
 function parseLeaderType(value?: string): LeaderType | null {
@@ -261,14 +309,18 @@ export async function POST(request: Request) {
       }
 
       const normalizedHeaders = headers.map(normalizeHeader);
-      const requiredHeaderGroups: Array<{ label: string; aliases: string[] }> = [
-        { label: "name", aliases: NAME_ALIASES },
-        { label: "party", aliases: PARTY_ALIASES },
-        { label: "state", aliases: STATE_ALIASES },
+      const requiredHeaderGroups: Array<{ label: string; aliases: string[]; hints: string[] }> = [
+        { label: "name", aliases: NAME_ALIASES, hints: ["name", "mp", "mla", "member"] },
+        { label: "party", aliases: PARTY_ALIASES, hints: ["party"] },
+        { label: "state", aliases: STATE_ALIASES, hints: ["state", "ut"] },
       ];
       const missingRequired = requiredHeaderGroups
         .filter(
-          (group) => !group.aliases.some((alias) => normalizedHeaders.includes(alias)),
+          (group) =>
+            !group.aliases.some((alias) => normalizedHeaders.includes(alias)) &&
+            !normalizedHeaders.some((header) =>
+              group.hints.some((hint) => header.includes(hint)),
+            ),
         )
         .map((group) => group.label);
 
@@ -285,11 +337,11 @@ export async function POST(request: Request) {
         const row = rows[index];
         const rowNumber = index + 2;
 
-        const name = getValue(row, NAME_ALIASES);
-        const partyName = getValue(row, PARTY_ALIASES);
+        const name = getValueWithHints(row, NAME_ALIASES, ["name", "mp", "mla", "member"]);
+        const partyName = getValueWithHints(row, PARTY_ALIASES, ["party"]);
         const partyShortName = getValue(row, PARTY_SHORT_NAME_ALIASES);
-        const stateName = getValue(row, STATE_ALIASES);
-        const districtName = getValue(row, DISTRICT_ALIASES);
+        const stateName = getValueWithHints(row, STATE_ALIASES, ["state", "ut"]);
+        const districtName = getValueWithHints(row, DISTRICT_ALIASES, ["district"]);
         const rowLeaderType =
           parseLeaderType(getValue(row, LEADER_TYPE_ALIASES)) ?? defaultLeaderType;
 
