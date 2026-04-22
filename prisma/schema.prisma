@@ -1,0 +1,117 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+//////////////////////////////////////////////////
+// USER
+//////////////////////////////////////////////////
+
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  createdAt DateTime @default(now())
+
+  votes     Vote[]
+}
+
+//////////////////////////////////////////////////
+// PARTY
+//////////////////////////////////////////////////
+
+model Party {
+  id        String   @id @default(cuid())
+  name      String
+  shortName String?
+  createdAt DateTime @default(now())
+
+  leaders   Leader[]
+}
+
+//////////////////////////////////////////////////
+// LOCATION (IMPORTANT FOR YOUR IDEA)
+//////////////////////////////////////////////////
+
+model State {
+  id     String  @id @default(cuid())
+  name   String
+
+  districts District[]
+  leaders   Leader[]
+}
+
+model District {
+  id      String @id @default(cuid())
+  name    String
+  stateId String
+
+  state   State @relation(fields: [stateId], references: [id])
+}
+
+//////////////////////////////////////////////////
+// LEADER (UNIFIED MODEL FOR MP + MLA)
+//////////////////////////////////////////////////
+
+enum LeaderType {
+  MP
+  MLA
+}
+
+model Leader {
+  id            String   @id @default(cuid())
+  name          String
+  type          LeaderType
+
+  // Relations
+  partyId       String?
+  stateId       String?
+
+  party         Party? @relation(fields: [partyId], references: [id])
+  state         State? @relation(fields: [stateId], references: [id])
+
+  // Basic Info
+  gender        String?
+  age           Int?
+  education     String?
+
+  // Constituency
+  constituency  String?
+
+  // Term
+  termStart     DateTime?
+  termEnd       DateTime?
+
+  // Performance (normalized)
+  debates       Int? @default(0)
+  questions     Int? @default(0)
+  attendance    Float? // %
+
+  // Metadata
+  createdAt     DateTime @default(now())
+
+  votes         Vote[]
+}
+
+//////////////////////////////////////////////////
+// REAL-TIME VOTING
+//////////////////////////////////////////////////
+
+enum VoteType {
+  UPVOTE
+  DOWNVOTE
+}
+model Vote {
+  id        String   @id @default(cuid())
+  userId    String
+  leaderId  String
+  type      VoteType
+  createdAt DateTime @default(now())
+
+  user      User   @relation(fields: [userId], references: [id])
+  leader    Leader @relation(fields: [leaderId], references: [id])
+
+  @@unique([userId, leaderId]) // prevent duplicate voting
+}
