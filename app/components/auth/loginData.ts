@@ -21,7 +21,6 @@ export const loginFeatureCards: LoginFeatureCard[] = [
 
 export const socialProviders: SocialProvider[] = [
   { id: "google", label: "Google" },
-  { id: "github", label: "GitHub" },
 ];
 
 export const loginLegalLinks: LegalLink[] = [

@@ -7,7 +7,7 @@ export interface LoginFeatureCard {
 }
 
 export interface SocialProvider {
-  id: "google" | "github";
+  id: "google";
   label: string;
 }
 
