@@ -1,4 +1,5 @@
 import { TrendingUp, Vote } from "lucide-react";
+import Link from "next/link";
 
 export function HeroSection() {
   return (
@@ -10,7 +11,7 @@ export function HeroSection() {
         </div>
         <h1 className="mx-auto mb-6 max-w-4xl text-5xl leading-[1.1] font-bold tracking-tight text-slate-900 md:text-7xl">
           The Real-Time Pulse of{" "}
-          <span className="bg-gradient-to-r from-teal-600 to-emerald-600 bg-clip-text text-transparent">
+          <span className="bg-linear-to-r from-teal-600 to-emerald-600 bg-clip-text text-transparent">
             Indian Democracy
           </span>
         </h1>
@@ -19,20 +20,20 @@ export function HeroSection() {
           political leaders across 4,000+ constituencies.
         </p>
         <div className="flex flex-col items-center justify-center gap-4 sm:flex-row">
-          <a
-            href="#"
+          <Link
+            href="/regions"
             className="flex w-full items-center justify-center gap-2 rounded-2xl bg-teal-600 px-8 py-4 text-lg font-bold text-white shadow-xl shadow-teal-600/20 transition-all hover:bg-teal-700 sm:w-auto"
           >
             <Vote className="h-5 w-5" />
             Cast Your Vote Now
-          </a>
-          <a
-            href="#"
+          </Link>
+          <Link
+            href="/insights"
             className="flex w-full items-center justify-center gap-2 rounded-2xl border border-slate-200 bg-white px-8 py-4 text-lg font-bold text-slate-700 shadow-sm transition-all hover:bg-slate-50 sm:w-auto"
           >
             <TrendingUp className="h-5 w-5" />
             Explore Trends
-          </a>
+          </Link>
         </div>
       </div>
       <div className="pointer-events-none absolute bottom-0 left-1/2 h-64 w-full max-w-5xl -translate-x-1/2 opacity-30">

@@ -10,14 +10,21 @@ datasource db {
 // USER
 //////////////////////////////////////////////////
 
+enum Provider {
+  GOOGLE
+}
+
 model User {
   id        String   @id @default(cuid())
   email     String   @unique
   password  String?
+  name      String?
+  displayName String?
+  provider  Provider @default(GOOGLE)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  votes     Vote[]
+  votes Vote[]
 
   @@index([email])
 }
@@ -32,7 +39,7 @@ model Party {
   shortName String?
   createdAt DateTime @default(now())
 
-  leaders   Leader[]
+  leaders Leader[]
 }
 
 //////////////////////////////////////////////////
@@ -40,8 +47,8 @@ model Party {
 //////////////////////////////////////////////////
 
 model State {
-  id     String  @id @default(cuid())
-  name   String
+  id   String @id @default(cuid())
+  name String
 
   districts District[]
   leaders   Leader[]
@@ -52,7 +59,7 @@ model District {
   name    String
   stateId String
 
-  state   State @relation(fields: [stateId], references: [id])
+  state State @relation(fields: [stateId], references: [id])
 }
 
 //////////////////////////////////////////////////
@@ -65,38 +72,38 @@ enum LeaderType {
 }
 
 model Leader {
-  id            String   @id @default(cuid())
-  name          String
-  type          LeaderType
+  id   String     @id @default(cuid())
+  name String
+  type LeaderType
 
   // Relations
-  partyId       String?
-  stateId       String?
+  partyId String?
+  stateId String?
 
-  party         Party? @relation(fields: [partyId], references: [id])
-  state         State? @relation(fields: [stateId], references: [id])
+  party Party? @relation(fields: [partyId], references: [id])
+  state State? @relation(fields: [stateId], references: [id])
 
   // Basic Info
-  gender        String?
-  age           Int?
-  education     String?
+  gender    String?
+  age       Int?
+  education String?
 
   // Constituency
-  constituency  String?
+  constituency String?
 
   // Term
-  termStart     DateTime?
-  termEnd       DateTime?
+  termStart DateTime?
+  termEnd   DateTime?
 
   // Performance (normalized)
-  debates       Int? @default(0)
-  questions     Int? @default(0)
-  attendance    Float? // %
+  debates    Int?   @default(0)
+  questions  Int?   @default(0)
+  attendance Float? // %
 
   // Metadata
-  createdAt     DateTime @default(now())
+  createdAt DateTime @default(now())
 
-  votes         Vote[]
+  votes Vote[]
 }
 
 //////////////////////////////////////////////////
@@ -107,6 +114,7 @@ enum VoteType {
   UPVOTE
   DOWNVOTE
 }
+
 model Vote {
   id        String   @id @default(cuid())
   userId    String
@@ -114,8 +122,8 @@ model Vote {
   type      VoteType
   createdAt DateTime @default(now())
 
-  user      User   @relation(fields: [userId], references: [id])
-  leader    Leader @relation(fields: [leaderId], references: [id])
+  user   User   @relation(fields: [userId], references: [id])
+  leader Leader @relation(fields: [leaderId], references: [id])
 
   @@unique([userId, leaderId]) // prevent duplicate voting
 }

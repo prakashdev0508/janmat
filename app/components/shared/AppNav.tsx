@@ -1,5 +1,10 @@
+"use client";
+
 import Link from "next/link";
-import { BarChart3 } from "lucide-react";
+import { BarChart3, LogOut } from "lucide-react";
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
+import { createClient } from "@/utils/supabase/client";
 
 type AppNavProps = {
   activeLink?: "nav-explore" | "nav-stats" | "nav-regions" | "nav-about";
@@ -27,11 +32,42 @@ export function AppNav({
   activeLink,
   exploreHref = "/regions",
   insightsHref = "/insights",
-  howItWorksHref = "/#how-it-works",
   onLogin,
-  onGetStarted,
   active,
 }: AppNavProps) {
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
+  const router = useRouter();
+
+  useEffect(() => {
+    const supabase = createClient();
+
+    supabase.auth.getSession().then(({ data }) => {
+      setIsLoggedIn(Boolean(data.session));
+    });
+
+    const { data: authListener } = supabase.auth.onAuthStateChange((_event, session) => {
+      setIsLoggedIn(Boolean(session));
+    });
+
+    return () => {
+      authListener.subscription.unsubscribe();
+    };
+  }, []);
+
+  async function handleLogout() {
+    if (isLoggingOut) return;
+    setIsLoggingOut(true);
+    try {
+      const supabase = createClient();
+      await supabase.auth.signOut();
+      router.push("/");
+      router.refresh();
+    } finally {
+      setIsLoggingOut(false);
+    }
+  }
+
   const resolvedActiveLink =
     activeLink ?? (active ? activeLinkByLegacyKey[active] : "nav-regions");
 
@@ -59,26 +95,28 @@ export function AppNav({
           <Link href={insightsHref} className={linkClass("nav-stats")}>
             Insights
           </Link>
-          <Link href={howItWorksHref} className={linkClass("nav-about")}>
-            How It Works
-          </Link>
         </div>
 
         <div className="flex items-center gap-4">
-          <Link
-            href="/login"
-            onClick={onLogin}
-            className="rounded-full border border-slate-200 bg-slate-100 px-5 py-2.5 text-sm font-semibold text-slate-700 transition-all hover:bg-slate-200"
-          >
-            Login
-          </Link>
-          <button
-            type="button"
-            onClick={onGetStarted}
-            className="rounded-full bg-teal-600 px-5 py-2.5 text-sm font-semibold text-white transition-all hover:bg-teal-700"
-          >
-            Get Started
-          </button>
+          {isLoggedIn ? (
+            <button
+              type="button"
+              aria-label="Logout"
+              onClick={handleLogout}
+              disabled={isLoggingOut}
+              className="flex h-10 w-10 items-center justify-center rounded-full border border-slate-200 bg-slate-100 text-slate-700 transition-all hover:bg-slate-200 disabled:cursor-not-allowed disabled:opacity-70"
+            >
+              <LogOut className="h-4 w-4" />
+            </button>
+          ) : (
+            <Link
+              href="/login"
+              onClick={onLogin}
+              className="rounded-full border border-slate-200 bg-slate-100 px-5 py-2.5 text-sm font-semibold text-slate-700 transition-all hover:bg-slate-200"
+            >
+              Login
+            </Link>
+          )}
         </div>
       </div>
     </nav>

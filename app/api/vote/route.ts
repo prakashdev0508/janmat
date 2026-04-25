@@ -1,41 +1,29 @@
 import { VoteType } from "@prisma/client";
 import { NextResponse } from "next/server";
+import { cookies } from "next/headers";
 import { prisma } from "@/lib/prisma";
-import { getSessionCookieName, verifySessionToken } from "@/lib/auth";
+import { createClient } from "@/utils/supabase/server";
+import { syncSupabaseUserToPrisma } from "@/lib/user-sync";
 
 export const runtime = "nodejs";
 
-function getCookieValue(cookieHeader: string | null, cookieName: string): string | null {
-  if (!cookieHeader) return null;
-  const parts = cookieHeader.split(";").map((part) => part.trim());
-  for (const part of parts) {
-    if (part.startsWith(`${cookieName}=`)) {
-      return decodeURIComponent(part.slice(cookieName.length + 1));
-    }
-  }
-  return null;
-}
-
 export async function POST(request: Request) {
   try {
-    const token = getCookieValue(
-      request.headers.get("cookie"),
-      getSessionCookieName(),
-    );
-    if (!token) {
+    const cookieStore = await cookies();
+    const supabase = createClient(cookieStore);
+    const {
+      data: { user: authUser },
+      error: authError,
+    } = await supabase.auth.getUser();
+
+    if (authError || !authUser) {
       return NextResponse.json(
         { error: "For vote you have to login to the account." },
         { status: 401 },
       );
     }
 
-    const session = await verifySessionToken(token);
-    if (!session) {
-      return NextResponse.json(
-        { error: "For vote you have to login to the account." },
-        { status: 401 },
-      );
-    }
+    const user = await syncSupabaseUserToPrisma(authUser, supabase);
 
     const body = (await request.json()) as {
       leaderId?: string;
@@ -61,12 +49,12 @@ export async function POST(request: Request) {
     await prisma.vote.upsert({
       where: {
         userId_leaderId: {
-          userId: session.userId,
+          userId: user.id,
           leaderId,
         },
       },
       create: {
-        userId: session.userId,
+        userId: user.id,
         leaderId,
         type: voteType,
       },
