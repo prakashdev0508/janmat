@@ -18,6 +18,7 @@ export function DashboardPage() {
   const router = useRouter();
   const [dashboardData, setDashboardData] =
     useState<DashboardData>(fallbackDashboardData);
+  const [isDashboardLoading, setIsDashboardLoading] = useState(true);
   const [requiresLoginOverlay, setRequiresLoginOverlay] = useState(false);
   const [localToggles, setLocalToggles] = useState(
     fallbackDashboardData.settingsToggles,
@@ -55,6 +56,10 @@ export function DashboardPage() {
       })
       .catch(() => {
         // Keep the static dashboard fallback if auth or network data is unavailable.
+      })
+      .finally(() => {
+        if (!isMounted) return;
+        setIsDashboardLoading(false);
       });
 
     return () => {
@@ -126,35 +131,55 @@ export function DashboardPage() {
       <AppNav active="dashboard" />
       <main className="flex-1 px-6 pt-24 pb-12">
         <div className="mx-auto max-w-7xl">
-          <UserProfileHero user={dashboardData.userProfile} />
-
-          <div className="grid grid-cols-1 gap-8 lg:grid-cols-12">
-            <div className="space-y-8 lg:col-span-8">
-              <RecommendationsPanel
-                leaders={dashboardData.recommendationLeaders}
-                votesByLeader={votesByLeader}
-                onVote={handleRecommendationVote}
-              />
-              <FavoritesPanel leaders={dashboardData.favoriteLeaders} />
-              <RecentVotesPanel votes={dashboardData.recentVotes} />
-            </div>
-
-            <div className="space-y-8 lg:col-span-4">
-              <StreakTrackerPanel
-                streakDaysCount={dashboardData.userProfile.streakDays}
-                days={interactiveStreakDays}
-              />
-              <QuickActionsPanel />
-              <div id="settings-panel">
-                <SettingsPanel
-                  toggles={localToggles}
-                  onToggle={handleToggle}
-                  onLogout={handleLogout}
-                  onManageSettings={handleManageSettings}
-                />
+          {isDashboardLoading ? (
+            <>
+              <div className="glass-card h-44 animate-pulse rounded-[32px] bg-slate-200" />
+              <div className="mt-8 grid grid-cols-1 gap-8 lg:grid-cols-12">
+                <div className="space-y-8 lg:col-span-8">
+                  <div className="glass-card h-72 animate-pulse rounded-[32px] bg-slate-200" />
+                  <div className="glass-card h-64 animate-pulse rounded-[32px] bg-slate-200" />
+                  <div className="glass-card h-56 animate-pulse rounded-[32px] bg-slate-200" />
+                </div>
+                <div className="space-y-8 lg:col-span-4">
+                  <div className="glass-card h-56 animate-pulse rounded-[32px] bg-slate-200" />
+                  <div className="glass-card h-36 animate-pulse rounded-[32px] bg-slate-200" />
+                  <div className="glass-card h-72 animate-pulse rounded-[32px] bg-slate-200" />
+                </div>
               </div>
-            </div>
-          </div>
+            </>
+          ) : (
+            <>
+              <UserProfileHero user={dashboardData.userProfile} />
+
+              <div className="grid grid-cols-1 gap-8 lg:grid-cols-12">
+                <div className="space-y-8 lg:col-span-8">
+                  <RecommendationsPanel
+                    leaders={dashboardData.recommendationLeaders}
+                    votesByLeader={votesByLeader}
+                    onVote={handleRecommendationVote}
+                  />
+                  <FavoritesPanel leaders={dashboardData.favoriteLeaders} />
+                  <RecentVotesPanel votes={dashboardData.recentVotes} />
+                </div>
+
+                <div className="space-y-8 lg:col-span-4">
+                  <StreakTrackerPanel
+                    streakDaysCount={dashboardData.userProfile.streakDays}
+                    days={interactiveStreakDays}
+                  />
+                  <QuickActionsPanel />
+                  <div id="settings-panel">
+                    <SettingsPanel
+                      toggles={localToggles}
+                      onToggle={handleToggle}
+                      onLogout={handleLogout}
+                      onManageSettings={handleManageSettings}
+                    />
+                  </div>
+                </div>
+              </div>
+            </>
+          )}
         </div>
       </main>
       <AppFooter />
