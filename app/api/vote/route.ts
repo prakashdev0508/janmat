@@ -7,6 +7,10 @@ import { syncSupabaseUserToPrisma } from "@/lib/user-sync";
 
 export const runtime = "nodejs";
 
+function getUtcDateStart(date: Date): Date {
+  return new Date(Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate()));
+}
+
 export async function POST(request: Request) {
   try {
     const cookieStore = await cookies();
@@ -46,21 +50,114 @@ export async function POST(request: Request) {
 
     const voteType = choice === "approve" ? VoteType.UPVOTE : VoteType.DOWNVOTE;
 
-    await prisma.vote.upsert({
-      where: {
-        userId_leaderId: {
+    await prisma.$transaction(async (tx) => {
+      const existingVote = await tx.vote.findUnique({
+        where: {
+          userId_leaderId: {
+            userId: user.id,
+            leaderId,
+          },
+        },
+        select: {
+          createdAt: true,
+          type: true,
+        },
+      });
+
+      const voteCreatedAt = existingVote?.createdAt ?? new Date();
+
+      await tx.vote.upsert({
+        where: {
+          userId_leaderId: {
+            userId: user.id,
+            leaderId,
+          },
+        },
+        create: {
           userId: user.id,
           leaderId,
+          type: voteType,
+          createdAt: voteCreatedAt,
         },
-      },
-      create: {
-        userId: user.id,
-        leaderId,
-        type: voteType,
-      },
-      update: {
-        type: voteType,
-      },
+        update: {
+          type: voteType,
+        },
+      });
+
+      const totals = await tx.vote.groupBy({
+        by: ["type"],
+        where: { leaderId },
+        _count: {
+          _all: true,
+        },
+      });
+
+      const upvotes =
+        totals.find((entry) => entry.type === VoteType.UPVOTE)?._count._all ?? 0;
+      const downvotes =
+        totals.find((entry) => entry.type === VoteType.DOWNVOTE)?._count._all ?? 0;
+      const totalVotes = upvotes + downvotes;
+      const popularity =
+        totalVotes === 0 ? 0 : Number(((upvotes / totalVotes) * 100).toFixed(1));
+
+      await tx.leaderVoteSummary.upsert({
+        where: { leaderId },
+        create: {
+          leaderId,
+          upvotes,
+          downvotes,
+          totalVotes,
+          popularity,
+        },
+        update: {
+          upvotes,
+          downvotes,
+          totalVotes,
+          popularity,
+        },
+      });
+
+      const voteDate = getUtcDateStart(voteCreatedAt);
+      const dailyTotals = await tx.vote.groupBy({
+        by: ["type"],
+        where: {
+          leaderId,
+          createdAt: {
+            gte: voteDate,
+            lt: new Date(voteDate.getTime() + 24 * 60 * 60 * 1000),
+          },
+        },
+        _count: {
+          _all: true,
+        },
+      });
+
+      const dailyUpvotes =
+        dailyTotals.find((entry) => entry.type === VoteType.UPVOTE)?._count._all ?? 0;
+      const dailyDownvotes =
+        dailyTotals.find((entry) => entry.type === VoteType.DOWNVOTE)?._count._all ?? 0;
+      const dailyTotalVotes = dailyUpvotes + dailyDownvotes;
+
+      await tx.leaderDailyVoteSummary.upsert({
+        where: {
+          leaderId_date: {
+            leaderId,
+            date: voteDate,
+          },
+        },
+        create: {
+          leaderId,
+          date: voteDate,
+          upvotes: dailyUpvotes,
+          downvotes: dailyDownvotes,
+          totalVotes: dailyTotalVotes,
+        },
+        update: {
+          upvotes: dailyUpvotes,
+          downvotes: dailyDownvotes,
+          totalVotes: dailyTotalVotes,
+        },
+      });
     });
 
     return NextResponse.json({ success: true });

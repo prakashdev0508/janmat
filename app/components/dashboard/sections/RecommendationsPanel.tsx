@@ -90,7 +90,7 @@ export function RecommendationsPanel({
             </div>
             {votesByLeader[leader.id] ? (
               <p className="text-[11px] font-semibold text-slate-500">
-                Vote preference recorded locally:{" "}
+                Vote submitted:{" "}
                 <span className="text-slate-700 capitalize">{votesByLeader[leader.id]}</span>
               </p>
             ) : null}

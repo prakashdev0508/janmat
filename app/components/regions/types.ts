@@ -31,3 +31,5 @@ export interface LeaderResult {
 }
 
 export type RegionsSort = "popularity_desc" | "votes_desc" | "name_asc";
+
+export type RegionsViewMode = "grid" | "list";

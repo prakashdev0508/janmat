@@ -4,8 +4,9 @@ export interface ComparisonBreadcrumb {
 }
 
 export interface LeaderSelectorField {
+  id: "leaderOne" | "leaderTwo";
   label: string;
-  placeholder: string;
+  value: string;
 }
 
 export interface ComparedLeader {
@@ -50,14 +51,23 @@ export interface KeyMetricRow {
 
 export interface OtherComparisonCard {
   title: string;
+  leaderOneId: string;
+  leaderTwoId: string;
   leaderOneAvatar: string;
   leaderTwoAvatar: string;
 }
 
+export interface PopularComparisonItem {
+  label: string;
+  leaderOneId: string;
+  leaderTwoId: string;
+}
+
 export interface ComparisonPageData {
   breadcrumbs: ComparisonBreadcrumb[];
+  allLeaders: Array<{ id: string; name: string }>;
   selectorFields: LeaderSelectorField[];
-  popularComparisons: string[];
+  popularComparisons: PopularComparisonItem[];
   leaders: ComparedLeader[];
   trendSeries: TrendSeries[];
   regionalPerformance: RegionalPerformanceRow[];

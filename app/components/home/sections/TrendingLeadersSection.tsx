@@ -1,4 +1,5 @@
 import Image from "next/image";
+import Link from "next/link";
 import { ChevronRight, TrendingDown, TrendingUp } from "lucide-react";
 import type { Leader } from "../homeData";
 
@@ -44,9 +45,12 @@ function LeaderCard({ leader }: { leader: Leader }) {
         <span className="text-xs font-semibold tracking-wider text-slate-400 uppercase">
           {leader.votesToday}
         </span>
-        <button className="rounded-xl bg-teal-50 px-4 py-2 text-sm font-bold text-teal-600 transition-all hover:bg-teal-600 hover:text-white">
+        <Link
+          href={leader.id ? `/vote?leader=${leader.id}` : "/vote"}
+          className="rounded-xl bg-teal-50 px-4 py-2 text-sm font-bold text-teal-600 transition-all hover:bg-teal-600 hover:text-white"
+        >
           Vote
-        </button>
+        </Link>
       </div>
     </div>
   );
@@ -65,9 +69,9 @@ export function TrendingLeadersSection({ leaders }: { leaders: Leader[] }) {
               Top popularity rankings based on today&apos;s voting activity.
             </p>
           </div>
-          <a href="#" className="flex items-center gap-1 font-bold text-teal-600 transition-all hover:gap-2">
+          <Link href="/regions" className="flex items-center gap-1 font-bold text-teal-600 transition-all hover:gap-2">
             View All <ChevronRight className="h-4 w-4" />
-          </a>
+          </Link>
         </div>
         <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
           {leaders.map((leader) => (

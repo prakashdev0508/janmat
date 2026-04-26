@@ -1,6 +1,7 @@
 export type TrendDirection = "up" | "down";
 
 export interface Leader {
+  id?: string;
   name: string;
   role: string;
   avatarUrl: string;
@@ -107,17 +108,17 @@ export const footerGroups: FooterGroup[] = [
     links: [
       { label: "Explore Trends", href: "/" },
       { label: "Voting Rules", href: "/dashboard" },
-      { label: "Identity Verification", href: "#" },
+      { label: "Identity Verification", href: "/dashboard" },
       { label: "Public API", href: "/insights" },
     ],
   },
   {
     title: "Company",
     links: [
-      { label: "About Us", href: "#" },
-      { label: "Methodology", href: "#" },
-      { label: "Privacy Policy", href: "#" },
-      { label: "Contact", href: "#" },
+      { label: "About Us", href: "/insights" },
+      { label: "Methodology", href: "/insights" },
+      { label: "Privacy Policy", href: "/insights" },
+      { label: "Contact", href: "/insights" },
     ],
   },
 ];

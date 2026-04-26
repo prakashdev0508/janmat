@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { ArrowRight, Quote } from "lucide-react";
 
 export function BottomCtaSection() {
@@ -12,13 +13,13 @@ export function BottomCtaSection() {
           Join millions of Indian citizens shaping the political discourse through
           real-time feedback and data visualization.
         </p>
-        <a
-          href="#"
+        <Link
+          href="/login"
           className="inline-flex items-center gap-3 rounded-2xl bg-white px-10 py-5 text-lg font-bold text-teal-700 shadow-xl transition-all hover:scale-105"
         >
           Create Your Anonymous Account
           <ArrowRight className="h-5 w-5" />
-        </a>
+        </Link>
       </div>
     </section>
   );

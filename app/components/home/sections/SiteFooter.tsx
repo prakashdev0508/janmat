@@ -1,9 +1,26 @@
+"use client";
+
 import type { FooterGroup } from "../homeData";
 import { BarChart3, Send } from "lucide-react";
 import { FaInstagram, FaLinkedinIn, FaTwitter } from "react-icons/fa";
 import Link from "next/link";
+import type { FormEvent } from "react";
 
 export function SiteFooter({ groups }: { groups: FooterGroup[] }) {
+  const handleNewsletterSubmit = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    const formData = new FormData(event.currentTarget);
+    const email = String(formData.get("email") ?? "");
+    if (!email) return;
+    await fetch("/api/newsletter", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ email }),
+    });
+  };
+
   return (
     <footer className="border-t border-slate-200 bg-white px-6 py-16">
       <div className="mx-auto max-w-7xl">
@@ -23,13 +40,13 @@ export function SiteFooter({ groups }: { groups: FooterGroup[] }) {
               engagement.
             </p>
             <div className="flex gap-4 text-slate-400">
-              <a href="#" className="transition-colors hover:text-teal-600" aria-label="Twitter">
+              <a href="https://x.com" className="transition-colors hover:text-teal-600" aria-label="Twitter">
                 <FaTwitter />
               </a>
-              <a href="#" className="transition-colors hover:text-teal-600" aria-label="LinkedIn">
+              <a href="https://www.linkedin.com" className="transition-colors hover:text-teal-600" aria-label="LinkedIn">
                 <FaLinkedinIn />
               </a>
-              <a href="#" className="transition-colors hover:text-teal-600" aria-label="Instagram">
+              <a href="https://www.instagram.com" className="transition-colors hover:text-teal-600" aria-label="Instagram">
                 <FaInstagram />
               </a>
             </div>
@@ -55,26 +72,28 @@ export function SiteFooter({ groups }: { groups: FooterGroup[] }) {
             <p className="mb-4 text-sm font-medium text-slate-500">
               Get weekly insights on political sentiment shifts.
             </p>
-            <div className="flex gap-2">
+            <form className="flex gap-2" onSubmit={handleNewsletterSubmit}>
               <input
                 type="email"
+                name="email"
                 placeholder="Your email"
                 className="flex-1 rounded-xl border border-slate-200 bg-slate-50 px-4 py-2 text-sm"
+                required
               />
-              <button className="rounded-xl bg-teal-600 px-4 py-2 text-white transition-all hover:bg-teal-700">
+              <button type="submit" className="rounded-xl bg-teal-600 px-4 py-2 text-white transition-all hover:bg-teal-700">
                 <Send className="h-4 w-4" />
               </button>
-            </div>
+            </form>
           </div>
         </div>
 
         <div className="flex flex-col items-center justify-between gap-4 border-t border-slate-100 pt-8 text-xs font-bold tracking-wider text-slate-400 uppercase md:flex-row">
           <p>© 2024 JanMat Platforms. Independent & Non-Official.</p>
           <div className="flex gap-6">
-            <Link href="#" className="transition-colors hover:text-slate-900">
+            <Link href="/insights" className="transition-colors hover:text-slate-900">
               Terms of Service
             </Link>
-            <Link href="#" className="transition-colors hover:text-slate-900">
+            <Link href="/insights" className="transition-colors hover:text-slate-900">
               Cookie Settings
             </Link>
           </div>
