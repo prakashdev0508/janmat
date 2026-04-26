@@ -4,6 +4,8 @@ import type { DashboardSettingToggle } from "../types";
 type SettingsPanelProps = {
   toggles: DashboardSettingToggle[];
   onToggle: (toggleId: string) => void;
+  onLogout: () => void;
+  onManageSettings: () => void;
 };
 
 function iconForSetting(id: DashboardSettingToggle["id"]) {
@@ -12,12 +14,21 @@ function iconForSetting(id: DashboardSettingToggle["id"]) {
   return Settings;
 }
 
-export function SettingsPanel({ toggles, onToggle }: SettingsPanelProps) {
+export function SettingsPanel({
+  toggles,
+  onToggle,
+  onLogout,
+  onManageSettings,
+}: SettingsPanelProps) {
   return (
     <section className="glass-card rounded-[32px] p-6">
       <div className="mb-6 flex items-center justify-between">
         <h3 className="font-bold text-slate-900">Settings</h3>
-        <button className="flex h-8 w-8 items-center justify-center rounded-full bg-slate-50 text-slate-400 transition-all hover:text-teal-600">
+        <button
+          type="button"
+          onClick={onManageSettings}
+          className="flex h-8 w-8 items-center justify-center rounded-full bg-slate-50 text-slate-400 transition-all hover:text-teal-600"
+        >
           <Settings className="h-4 w-4" />
         </button>
       </div>
@@ -69,7 +80,11 @@ export function SettingsPanel({ toggles, onToggle }: SettingsPanelProps) {
         </div>
       </div>
 
-      <button className="mt-6 flex w-full items-center justify-center gap-2 rounded-xl py-2.5 text-xs font-bold tracking-widest text-red-500 uppercase transition-all hover:bg-red-50">
+      <button
+        type="button"
+        onClick={onLogout}
+        className="mt-6 flex w-full items-center justify-center gap-2 rounded-xl py-2.5 text-xs font-bold tracking-widest text-red-500 uppercase transition-all hover:bg-red-50"
+      >
         <LogOut className="h-4 w-4" />
         Logout Session
       </button>

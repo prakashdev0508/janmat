@@ -1,4 +1,5 @@
 import Image from "next/image";
+import Link from "next/link";
 import { TrendingUp } from "lucide-react";
 import type { ComparedLeader } from "../types";
 
@@ -44,12 +45,12 @@ export function LeaderComparisonColumn({ leader }: LeaderComparisonColumnProps) 
             <span>{leader.sentimentDelta}</span>
           </div>
         </div>
-        <button
-          type="button"
+        <Link
+          href={`/vote?leader=${leader.id}`}
           className={`mt-8 w-full max-w-xs rounded-2xl py-4 text-lg font-bold transition-all active:scale-95 ${actionClass}`}
         >
           {leader.buttonLabel}
-        </button>
+        </Link>
       </div>
     </article>
   );

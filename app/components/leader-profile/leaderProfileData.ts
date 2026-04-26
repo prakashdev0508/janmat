@@ -1,48 +1,19 @@
-import { VoteType } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
+import {
+  formatNumber,
+  getAvatarUrl,
+  getUtcDateStart,
+  getVoteCounts,
+  getYesterdayUtcDateStart,
+} from "@/lib/leader-metrics";
 import type { LeaderProfileData } from "./types";
 
-function formatNumber(value: number): string {
-  return new Intl.NumberFormat("en-IN").format(value);
-}
-
-function getTodayStart(): Date {
-  const date = new Date();
-  date.setHours(0, 0, 0, 0);
-  return date;
-}
-
-function getYesterdayStart(): Date {
-  const date = new Date();
-  date.setDate(date.getDate() - 1);
-  date.setHours(0, 0, 0, 0);
-  return date;
-}
-
-function calculateVoteStats(votes: Array<{ type: VoteType; createdAt: Date }>) {
-  const todayStart = getTodayStart();
-  const yesterdayStart = getYesterdayStart();
-  let upvotes = 0;
-  let downvotes = 0;
-  let votesToday = 0;
-  let yesterdayVotes = 0;
-
-  votes.forEach((vote) => {
-    if (vote.type === VoteType.UPVOTE) {
-      upvotes += 1;
-    } else {
-      downvotes += 1;
-    }
-
-    if (vote.createdAt >= todayStart) {
-      votesToday += 1;
-    } else if (vote.createdAt >= yesterdayStart && vote.createdAt < todayStart) {
-      yesterdayVotes += 1;
-    }
-  });
-
-  const totalVotes = upvotes + downvotes;
-  const popularity = totalVotes > 0 ? Number(((upvotes / totalVotes) * 100).toFixed(1)) : 0;
+function calculateVoteStats(
+  summary: { upvotes: number; downvotes: number; totalVotes: number; popularity: number } | null,
+  votesToday: number,
+  yesterdayVotes: number,
+) {
+  const { upvotes, downvotes, totalVotes, popularity } = getVoteCounts(summary);
   const changeBase = Math.max(yesterdayVotes, 1);
   const delta = ((votesToday - yesterdayVotes) / changeBase) * 100;
 
@@ -57,15 +28,20 @@ function calculateVoteStats(votes: Array<{ type: VoteType; createdAt: Date }>) {
 }
 
 export async function getLeaderProfileData(leaderId: string): Promise<LeaderProfileData | null> {
+  const today = getUtcDateStart();
+  const yesterday = getYesterdayUtcDateStart();
+
   const leader = await prisma.leader.findUnique({
     where: { id: leaderId },
     include: {
       party: true,
       state: true,
-      votes: {
-        select: {
-          type: true,
-          createdAt: true,
+      voteSummary: true,
+      dailyVoteSummaries: {
+        where: {
+          date: {
+            in: [today, yesterday],
+          },
         },
       },
     },
@@ -75,7 +51,12 @@ export async function getLeaderProfileData(leaderId: string): Promise<LeaderProf
     return null;
   }
 
-  const voteStats = calculateVoteStats(leader.votes);
+  const dailyByDate = new Map(
+    leader.dailyVoteSummaries.map((summary) => [summary.date.toISOString(), summary]),
+  );
+  const todayVotes = dailyByDate.get(today.toISOString())?.totalVotes ?? 0;
+  const yesterdayVotes = dailyByDate.get(yesterday.toISOString())?.totalVotes ?? 0;
+  const voteStats = calculateVoteStats(leader.voteSummary, todayVotes, yesterdayVotes);
   const neutralPercentage = Math.max(0, Number((100 - voteStats.popularity).toFixed(1)));
   const disapprovalPercentage = Number(
     (
@@ -83,38 +64,40 @@ export async function getLeaderProfileData(leaderId: string): Promise<LeaderProf
     ).toFixed(1),
   );
 
-  const relatedCandidates = await prisma.leader.findMany({
+  const relatedWhere = {
+    id: { not: leader.id },
+    stateId: leader.stateId ?? undefined,
+  };
+
+  const relatedCandidates = await prisma.leaderVoteSummary.findMany({
     where: {
-      id: { not: leader.id },
-      stateId: leader.stateId ?? undefined,
+      leader: relatedWhere,
     },
+    orderBy: [{ popularity: "desc" }, { totalVotes: "desc" }],
+    take: 4,
     include: {
-      party: true,
-      state: true,
-      votes: {
-        select: {
-          type: true,
-          createdAt: true,
+      leader: {
+        include: {
+          party: true,
+          state: true,
         },
       },
     },
-    take: 8,
   });
 
   const relatedLeaders = relatedCandidates
-    .map((candidate) => {
-      const metrics = calculateVoteStats(candidate.votes);
+    .map((candidateSummary) => {
+      const candidate = candidateSummary.leader;
       return {
         id: candidate.id,
         name: candidate.name,
         partyRegion: `${candidate.party?.shortName || candidate.party?.name || "IND"} | ${
           candidate.constituency || candidate.state?.name || "India"
         }`,
-        popularity: metrics.popularity,
-        avatarUrl: `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(candidate.name)}`,
+        popularity: candidateSummary.popularity,
+        avatarUrl: getAvatarUrl(candidate.name),
       };
     })
-    .sort((a, b) => b.popularity - a.popularity)
     .slice(0, 4);
 
   const regionalSentiment = [
@@ -178,7 +161,7 @@ export async function getLeaderProfileData(leaderId: string): Promise<LeaderProf
       website: "janmat.in",
       twitter: `@${leader.name.toLowerCase().replace(/\s+/g, "")}`,
       activeSince: String(leader.termStart?.getFullYear() ?? leader.createdAt.getFullYear()),
-      avatarUrl: `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(leader.name)}`,
+      avatarUrl: getAvatarUrl(leader.name),
     },
     popularity: voteStats.popularity,
     popularityDelta: voteStats.popularityDelta,

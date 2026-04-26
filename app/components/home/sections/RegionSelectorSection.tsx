@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { MapPin, Search } from "lucide-react";
 
 export function RegionSelectorSection({ states }: { states: string[] }) {
@@ -20,20 +21,24 @@ export function RegionSelectorSection({ states }: { states: string[] }) {
             className="w-full rounded-2xl border border-slate-200 bg-white py-4 pr-4 pl-12 text-slate-700 shadow-sm focus:ring-2 focus:ring-teal-500/20 focus:outline-none"
           />
         </div>
-        <button className="flex items-center justify-center gap-2 rounded-2xl border border-slate-200 bg-white px-8 py-4 font-bold text-slate-700 shadow-sm transition-all hover:border-teal-500 hover:text-teal-600">
+        <Link
+          href="/regions"
+          className="flex items-center justify-center gap-2 rounded-2xl border border-slate-200 bg-white px-8 py-4 font-bold text-slate-700 shadow-sm transition-all hover:border-teal-500 hover:text-teal-600"
+        >
           <MapPin className="h-5 w-5" />
           Use Location
-        </button>
+        </Link>
       </div>
 
       <div className="mx-auto mt-12 flex max-w-7xl flex-wrap justify-center gap-3">
         {states.map((state) => (
-          <button
+          <Link
             key={state}
+            href={`/regions?q=${encodeURIComponent(state)}`}
             className="rounded-full border border-slate-200 bg-white px-6 py-2 text-sm font-bold text-slate-600 shadow-sm transition-all hover:border-teal-400 hover:bg-teal-50 hover:text-teal-700"
           >
             {state}
-          </button>
+          </Link>
         ))}
       </div>
     </section>

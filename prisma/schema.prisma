@@ -104,6 +104,14 @@ model Leader {
   createdAt DateTime @default(now())
 
   votes Vote[]
+  voteSummary LeaderVoteSummary?
+  dailyVoteSummaries LeaderDailyVoteSummary[]
+
+  @@index([stateId])
+  @@index([partyId])
+  @@index([type])
+  @@index([stateId, type])
+  @@index([partyId, type])
 }
 
 //////////////////////////////////////////////////
@@ -126,4 +134,35 @@ model Vote {
   leader Leader @relation(fields: [leaderId], references: [id])
 
   @@unique([userId, leaderId]) // prevent duplicate voting
+  @@index([leaderId])
+  @@index([userId, createdAt])
+  @@index([leaderId, createdAt])
+}
+
+model LeaderVoteSummary {
+  leaderId   String   @id
+  upvotes    Int      @default(0)
+  downvotes  Int      @default(0)
+  totalVotes Int      @default(0)
+  popularity Float    @default(0)
+  updatedAt  DateTime @updatedAt
+
+  leader Leader @relation(fields: [leaderId], references: [id], onDelete: Cascade)
+
+  @@index([popularity, totalVotes])
+  @@index([totalVotes])
+}
+
+model LeaderDailyVoteSummary {
+  leaderId   String   @db.Text
+  date       DateTime @db.Date
+  upvotes    Int      @default(0)
+  downvotes  Int      @default(0)
+  totalVotes Int      @default(0)
+
+  leader Leader @relation(fields: [leaderId], references: [id], onDelete: Cascade)
+
+  @@id([leaderId, date])
+  @@index([date, totalVotes])
+  @@index([leaderId, date])
 }

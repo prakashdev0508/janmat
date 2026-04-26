@@ -1,8 +1,9 @@
 import { LeaderResultCard } from "../LeaderResultCard";
-import type { LeaderResult } from "../types";
+import type { LeaderResult, RegionsViewMode } from "../types";
 
 type RegionalLeadersGridProps = {
   leaders: LeaderResult[];
+  viewMode?: RegionsViewMode;
   isLoading?: boolean;
   error?: string | null;
   onRetry?: () => void;
@@ -10,13 +11,19 @@ type RegionalLeadersGridProps = {
 
 export function RegionalLeadersGrid({
   leaders,
+  viewMode = "grid",
   isLoading = false,
   error = null,
   onRetry,
 }: RegionalLeadersGridProps) {
+  const gridClass =
+    viewMode === "list"
+      ? "grid grid-cols-1 gap-6"
+      : "grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-2";
+
   if (isLoading) {
     return (
-      <div className="grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-2">
+      <div className={gridClass}>
         {Array.from({ length: 6 }).map((_, index) => (
           <div
             key={`leader-skeleton-${index}`}
@@ -68,7 +75,7 @@ export function RegionalLeadersGrid({
   }
 
   return (
-    <div className="grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-2">
+    <div className={gridClass}>
       {leaders.map((leader) => (
         <LeaderResultCard key={leader.id} leader={leader} />
       ))}

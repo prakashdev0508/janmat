@@ -1,4 +1,4 @@
-import { leaders, stateChips, stats, howItWorksSteps, footerGroups } from "./homeData";
+import { fallbackHomePageData, type HomePageData } from "@/lib/home-page-data";
 import { BottomCtaSection } from "./sections/BottomCtaSection";
 import { HeroSection } from "./sections/HeroSection";
 import { HowItWorksSection } from "./sections/HowItWorksSection";
@@ -8,19 +8,23 @@ import { StatsSection } from "./sections/StatsSection";
 import { TrendingLeadersSection } from "./sections/TrendingLeadersSection";
 import { AppNav } from "../shared/AppNav";
 
-export function HomePage() {
+type HomePageProps = {
+  data?: HomePageData;
+};
+
+export function HomePage({ data = fallbackHomePageData }: HomePageProps) {
   return (
     <div className="min-h-screen bg-slate-50">
       <AppNav active="home" />
       <main className="pt-20">
         <HeroSection />
-        <TrendingLeadersSection leaders={leaders} />
-        <RegionSelectorSection states={stateChips} />
-        <StatsSection stats={stats} />
-        <HowItWorksSection steps={howItWorksSteps} />
+        <TrendingLeadersSection leaders={data.leaders} />
+        <RegionSelectorSection states={data.stateChips} />
+        <StatsSection stats={data.stats} />
+        <HowItWorksSection steps={data.howItWorksSteps} />
         <BottomCtaSection />
       </main>
-      <SiteFooter groups={footerGroups} />
+      <SiteFooter groups={data.footerGroups} />
     </div>
   );
 }

@@ -1,4 +1,5 @@
 import type {
+  DashboardData,
   DashboardSettingToggle,
   DashboardUserProfile,
   FavoriteLeader,
@@ -99,3 +100,12 @@ export const settingsToggles: DashboardSettingToggle[] = [
   { id: "reminder", label: "Daily Reminder", enabled: true },
   { id: "digest", label: "Weekly Digest", enabled: false },
 ];
+
+export const fallbackDashboardData: DashboardData = {
+  userProfile: dashboardUserProfile,
+  recommendationLeaders,
+  favoriteLeaders,
+  recentVotes,
+  streakDays,
+  settingsToggles,
+};

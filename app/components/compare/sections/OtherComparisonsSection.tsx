@@ -5,9 +5,13 @@ import type { OtherComparisonCard } from "../types";
 
 type OtherComparisonsSectionProps = {
   comparisons: OtherComparisonCard[];
+  onSelectPair: (leaderOneId: string, leaderTwoId: string) => void;
 };
 
-export function OtherComparisonsSection({ comparisons }: OtherComparisonsSectionProps) {
+export function OtherComparisonsSection({
+  comparisons,
+  onSelectPair,
+}: OtherComparisonsSectionProps) {
   return (
     <section className="mt-24 px-6 pb-24">
       <div className="mx-auto max-w-7xl">
@@ -54,6 +58,7 @@ export function OtherComparisonsSection({ comparisons }: OtherComparisonsSection
               <h4 className="mb-4 text-center font-bold text-slate-900">{comparison.title}</h4>
               <button
                 type="button"
+                onClick={() => onSelectPair(comparison.leaderOneId, comparison.leaderTwoId)}
                 className="w-full rounded-xl border border-slate-100 bg-slate-50 py-2.5 text-sm font-bold text-slate-600 transition-all hover:bg-teal-50 hover:text-teal-600"
               >
                 Compare

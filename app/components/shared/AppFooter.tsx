@@ -21,19 +21,19 @@ type AppFooterProps = {
 };
 
 export function AppFooter({
-  twitterHref = "#twitter",
-  linkedinHref = "#linkedin",
-  instagramHref = "#instagram",
-  exploreHref = "#explore",
-  votingHref = "#voting-rules",
-  verifyHref = "#verification",
-  apiHref = "#api",
-  aboutHref = "#about",
-  methodHref = "#methodology",
-  privacyHref = "#privacy",
-  contactHref = "#contact",
-  termsHref = "#terms",
-  cookiesHref = "#cookies",
+  twitterHref = "https://x.com",
+  linkedinHref = "https://www.linkedin.com",
+  instagramHref = "https://www.instagram.com",
+  exploreHref = "/regions",
+  votingHref = "/vote",
+  verifyHref = "/dashboard",
+  apiHref = "/insights",
+  aboutHref = "/insights",
+  methodHref = "/insights",
+  privacyHref = "/insights",
+  contactHref = "/insights",
+  termsHref = "/insights",
+  cookiesHref = "/insights",
   onSubscribe,
 }: AppFooterProps) {
   return (
@@ -135,7 +135,19 @@ export function AppFooter({
                 event.preventDefault();
                 const formData = new FormData(event.currentTarget);
                 const email = String(formData.get("email") ?? "");
-                onSubscribe?.(email);
+                if (onSubscribe) {
+                  onSubscribe(email);
+                  return;
+                }
+                fetch("/api/newsletter", {
+                  method: "POST",
+                  headers: {
+                    "Content-Type": "application/json",
+                  },
+                  body: JSON.stringify({ email }),
+                }).catch(() => {
+                  // Intentionally no-op in footer fallback mode.
+                });
               }}
             >
               <input

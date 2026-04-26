@@ -1,5 +1,14 @@
-import { Prisma, VoteType } from "@prisma/client";
+import { Prisma } from "@prisma/client";
 import { NextResponse } from "next/server";
+import { getMemoryCached, jsonWithCache } from "@/lib/api-cache";
+import {
+  formatNumber,
+  formatRole,
+  getAvatarUrl,
+  getTrend,
+  getUtcDateStart,
+  getYesterdayUtcDateStart,
+} from "@/lib/leader-metrics";
 import { prisma } from "@/lib/prisma";
 
 export const runtime = "nodejs";
@@ -9,14 +18,6 @@ const DEFAULT_PAGE_SIZE = 12;
 const MAX_PAGE_SIZE = 50;
 
 type SortBy = "popularity_desc" | "votes_desc" | "name_asc";
-
-type MetricTotals = {
-  upvotes: number;
-  downvotes: number;
-  totalVotes: number;
-  sentiment: number;
-  votesToday: number;
-};
 
 function parseSort(sort: string | null): SortBy {
   if (sort === "votes_desc" || sort === "name_asc") {
@@ -31,78 +32,6 @@ function parsePositiveInt(value: string | null, fallback: number): number {
     return fallback;
   }
   return parsed;
-}
-
-function formatNumber(value: number): string {
-  return new Intl.NumberFormat("en-IN").format(value);
-}
-
-function getTodayStart(): Date {
-  const todayStart = new Date();
-  todayStart.setHours(0, 0, 0, 0);
-  return todayStart;
-}
-
-function getYesterdayStart(): Date {
-  const yesterdayStart = new Date();
-  yesterdayStart.setDate(yesterdayStart.getDate() - 1);
-  yesterdayStart.setHours(0, 0, 0, 0);
-  return yesterdayStart;
-}
-
-function getMetricTotals(
-  allVotes: Array<{ type: VoteType; createdAt: Date }>,
-): MetricTotals & { yesterdayVotes: number } {
-  let upvotes = 0;
-  let downvotes = 0;
-  let votesToday = 0;
-  let yesterdayVotes = 0;
-
-  const todayStart = getTodayStart();
-  const yesterdayStart = getYesterdayStart();
-
-  allVotes.forEach((vote) => {
-    if (vote.type === VoteType.UPVOTE) {
-      upvotes += 1;
-    } else {
-      downvotes += 1;
-    }
-
-    if (vote.createdAt >= todayStart) {
-      votesToday += 1;
-    } else if (vote.createdAt >= yesterdayStart && vote.createdAt < todayStart) {
-      yesterdayVotes += 1;
-    }
-  });
-
-  const totalVotes = upvotes + downvotes;
-  const sentiment = totalVotes === 0 ? 0 : Number(((upvotes / totalVotes) * 100).toFixed(1));
-
-  return {
-    upvotes,
-    downvotes,
-    totalVotes,
-    sentiment,
-    votesToday,
-    yesterdayVotes,
-  };
-}
-
-function getTrend(votesToday: number, yesterdayVotes: number): { trendDirection: "up" | "down"; trendValue: string } {
-  if (votesToday >= yesterdayVotes) {
-    const base = Math.max(yesterdayVotes, 1);
-    const growth = ((votesToday - yesterdayVotes) / base) * 100;
-    return {
-      trendDirection: "up",
-      trendValue: `${growth.toFixed(1)}%`,
-    };
-  }
-
-  const drop = ((yesterdayVotes - votesToday) / Math.max(yesterdayVotes, 1)) * 100;
-  return {
-    trendDirection: "down",
-    trendValue: `${drop.toFixed(1)}%`,
-  };
 }
 
 export async function GET(request: Request) {
@@ -139,95 +68,118 @@ export async function GET(request: Request) {
       ],
     };
 
-    const filteredLeaders = await prisma.leader.findMany({
-      where,
-      include: {
-        party: true,
-        state: true,
-      },
-    });
+    const payload = await getMemoryCached(
+      `regions-leaders:${q}:${state}:${partyIds.join(",")}:${sort}:${page}:${pageSize}`,
+      10_000,
+      async () => {
+        const total = await prisma.leader.count({ where });
+        const totalPages = Math.max(1, Math.ceil(total / pageSize));
+        const currentPage = Math.min(page, totalPages);
+        const start = (currentPage - 1) * pageSize;
 
-    const total = filteredLeaders.length;
-    const totalPages = Math.max(1, Math.ceil(total / pageSize));
-    const currentPage = Math.min(page, totalPages);
+        const summaryOrderedRows =
+          sort === "name_asc"
+            ? null
+            : await prisma.leaderVoteSummary.findMany({
+                where: { leader: where },
+                orderBy:
+                  sort === "votes_desc"
+                    ? [
+                        { leader: { type: "asc" } },
+                        { totalVotes: "desc" },
+                        { popularity: "desc" },
+                      ]
+                    : [
+                        { leader: { type: "asc" } },
+                        { popularity: "desc" },
+                        { totalVotes: "desc" },
+                      ],
+                skip: start,
+                take: pageSize,
+                include: {
+                  leader: {
+                    include: {
+                      party: true,
+                      state: true,
+                    },
+                  },
+                },
+              });
 
-    const leaderIds = filteredLeaders.map((leader) => leader.id);
-    const votes = leaderIds.length
-      ? await prisma.vote.findMany({
-          where: {
-            leaderId: {
-              in: leaderIds,
+        const leaderRows =
+          summaryOrderedRows?.map((row) => ({
+            leader: row.leader,
+            summary: row,
+          })) ??
+          (await prisma.leader.findMany({
+            where,
+            orderBy: [{ type: "asc" }, { name: "asc" }],
+            skip: start,
+            take: pageSize,
+            include: {
+              party: true,
+              state: true,
+              voteSummary: true,
             },
+          })).map((leader) => ({
+            leader,
+            summary: leader.voteSummary,
+          }));
+
+        const leaderIds = leaderRows.map(({ leader }) => leader.id);
+        const today = getUtcDateStart();
+        const yesterday = getYesterdayUtcDateStart();
+        const dailySummaries = leaderIds.length
+          ? await prisma.leaderDailyVoteSummary.findMany({
+              where: {
+                leaderId: { in: leaderIds },
+                date: { in: [today, yesterday] },
+              },
+            })
+          : [];
+
+        const dailyByLeaderAndDate = new Map(
+          dailySummaries.map((summary) => [
+            `${summary.leaderId}:${summary.date.toISOString()}`,
+            summary,
+          ]),
+        );
+
+        const items = leaderRows.map(({ leader, summary }) => {
+          const todaySummary = dailyByLeaderAndDate.get(`${leader.id}:${today.toISOString()}`);
+          const yesterdaySummary = dailyByLeaderAndDate.get(
+            `${leader.id}:${yesterday.toISOString()}`,
+          );
+          const trend = getTrend(todaySummary, yesterdaySummary);
+
+          return {
+            id: leader.id,
+            name: leader.name,
+            role: formatRole(leader.type, leader.constituency),
+            party: leader.party?.shortName || leader.party?.name || "Independent",
+            region: leader.state?.name || "All India",
+            avatarUrl: getAvatarUrl(leader.name),
+            sentiment: summary?.popularity ?? 0,
+            trendDirection: trend.trendDirection,
+            trendValue: trend.trendValue,
+            votesToday: formatNumber(trend.votesToday),
+          };
+        });
+
+        return {
+          meta: {
+            page: currentPage,
+            pageSize,
+            total,
+            totalPages,
+            sort,
           },
-          select: {
-            leaderId: true,
-            type: true,
-            createdAt: true,
-          },
-        })
-      : [];
-
-    const votesByLeaderId = new Map<string, Array<{ type: VoteType; createdAt: Date }>>();
-    votes.forEach((vote) => {
-      const existing = votesByLeaderId.get(vote.leaderId) ?? [];
-      existing.push({ type: vote.type, createdAt: vote.createdAt });
-      votesByLeaderId.set(vote.leaderId, existing);
-    });
-
-    const ranked = filteredLeaders.map((leader) => {
-      const metrics = getMetricTotals(votesByLeaderId.get(leader.id) ?? []);
-      const trend = getTrend(metrics.votesToday, metrics.yesterdayVotes);
-      return {
-        leader,
-        metrics,
-        trend,
-      };
-    });
-
-    ranked.sort((a, b) => {
-      // Always prioritize MPs before MLAs on Regions listing.
-      if (a.leader.type !== b.leader.type) {
-        return a.leader.type === "MP" ? -1 : 1;
-      }
-
-      if (sort === "name_asc") {
-        return a.leader.name.localeCompare(b.leader.name);
-      }
-      if (sort === "votes_desc") {
-        return b.metrics.totalVotes - a.metrics.totalVotes;
-      }
-      if (b.metrics.sentiment !== a.metrics.sentiment) {
-        return b.metrics.sentiment - a.metrics.sentiment;
-      }
-      return b.metrics.totalVotes - a.metrics.totalVotes;
-    });
-
-    const start = (currentPage - 1) * pageSize;
-    const pageItems = ranked.slice(start, start + pageSize);
-
-    const items = pageItems.map(({ leader, metrics, trend }) => ({
-      id: leader.id,
-      name: leader.name,
-      role: `${leader.type}${leader.constituency ? `, ${leader.constituency}` : ""}`,
-      party: leader.party?.shortName || leader.party?.name || "Independent",
-      region: leader.state?.name || "All India",
-      avatarUrl: `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(leader.name)}`,
-      sentiment: metrics.sentiment,
-      trendDirection: trend.trendDirection,
-      trendValue: trend.trendValue,
-      votesToday: formatNumber(metrics.votesToday),
-    }));
-
-    return NextResponse.json({
-      meta: {
-        page: currentPage,
-        pageSize,
-        total,
-        totalPages,
-        sort,
+          items,
+        };
       },
-      items,
-    });
+    );
+
+    return jsonWithCache(payload);
   } catch (error) {
     const message = error instanceof Error ? error.message : "Unknown error";
     return NextResponse.json({ error: message }, { status: 500 });

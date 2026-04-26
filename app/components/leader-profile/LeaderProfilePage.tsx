@@ -38,16 +38,16 @@ export function LeaderProfilePage({ profile }: LeaderProfilePageProps) {
         <RelatedLeadersSection leaders={profile.relatedLeaders} />
       </main>
       <AppFooter
-        exploreHref="/"
+        exploreHref="/regions"
         votingHref="/vote"
         verifyHref="/dashboard"
         apiHref="/insights"
-        aboutHref="/"
+        aboutHref="/insights"
         methodHref="/insights"
-        privacyHref="#privacy"
-        contactHref="#contact"
-        termsHref="#terms"
-        cookiesHref="#cookies"
+        privacyHref="/insights"
+        contactHref="/insights"
+        termsHref="/insights"
+        cookiesHref="/insights"
       />
     </div>
   );

@@ -390,16 +390,22 @@ export async function POST(request: Request) {
             attendance: parseFloatValue(getValue(row, ATTENDANCE_ALIASES)),
           };
 
-          if (existingLeader) {
-            await prisma.leader.update({
+          const savedLeader = existingLeader
+            ? await prisma.leader.update({
               where: { id: existingLeader.id },
               data: leaderData,
-            });
-          } else {
-            await prisma.leader.create({
+              select: { id: true },
+            })
+            : await prisma.leader.create({
               data: leaderData,
+              select: { id: true },
             });
-          }
+
+          await prisma.leaderVoteSummary.upsert({
+            where: { leaderId: savedLeader.id },
+            create: { leaderId: savedLeader.id },
+            update: {},
+          });
 
           importedCount += 1;
           fileSummary.importedCount += 1;

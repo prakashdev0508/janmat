@@ -9,7 +9,7 @@ import { RegionalLeadersGrid } from "./sections/RegionalLeadersGrid";
 import { RegionalPagination } from "./sections/RegionalPagination";
 import { RegionalResultsToolbar } from "./sections/RegionalResultsToolbar";
 import { RegionalSearchHeader } from "./sections/RegionalSearchHeader";
-import type { LeaderResult, PartyOption, RegionOption, RegionsSort, SortOption } from "./types";
+import type { LeaderResult, PartyOption, RegionOption, RegionsSort, RegionsViewMode, SortOption } from "./types";
 
 type RegionsFacetsResponse = {
   regions: RegionOption[];
@@ -58,6 +58,7 @@ export function RegionalSearchPage() {
   ]);
 
   const [leaders, setLeaders] = useState<LeaderResult[]>([]);
+  const [viewMode, setViewMode] = useState<RegionsViewMode>("grid");
   const [isLeadersLoading, setIsLeadersLoading] = useState(true);
   const [isFacetsLoading, setIsFacetsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -226,9 +227,14 @@ export function RegionalSearchPage() {
           />
 
           <div className="flex-1">
-            <RegionalResultsToolbar totalLeaders={meta.total} />
+            <RegionalResultsToolbar
+              totalLeaders={meta.total}
+              viewMode={viewMode}
+              onViewModeChange={setViewMode}
+            />
             <RegionalLeadersGrid
               leaders={leaders}
+              viewMode={viewMode}
               isLoading={isLeadersLoading || isFacetsLoading}
               error={error}
               onRetry={() => {

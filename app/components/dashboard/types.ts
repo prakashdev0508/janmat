@@ -46,3 +46,12 @@ export interface DashboardSettingToggle {
   label: string;
   enabled: boolean;
 }
+
+export interface DashboardData {
+  userProfile: DashboardUserProfile;
+  recommendationLeaders: RecommendationLeader[];
+  favoriteLeaders: FavoriteLeader[];
+  recentVotes: RecentVoteItem[];
+  streakDays: StreakDay[];
+  settingsToggles: DashboardSettingToggle[];
+}

@@ -1,4 +1,5 @@
 import { Activity, LineChart, Map, PieChart } from "lucide-react";
+import Link from "next/link";
 import type {
   ComparedLeader,
   KeyMetricRow,
@@ -178,18 +179,18 @@ export function ComparisonAnalyticsPanel({
             </h3>
             <ComparisonMetricsTable metricRows={keyMetrics} />
             <div className="mt-12 flex flex-wrap items-center justify-center gap-6">
-              <button
-                type="button"
+              <Link
+                href={leaders[0] ? `/vote?leader=${leaders[0].id}` : "/vote"}
                 className="rounded-2xl bg-teal-600 px-10 py-5 text-lg font-bold text-white shadow-xl shadow-teal-600/20 transition-all hover:bg-teal-700 active:scale-95"
               >
-                Vote for Modi Now
-              </button>
-              <button
-                type="button"
+                {leaders[0] ? `Vote for ${leaders[0].name.split(" ")[0]} Now` : "Vote Now"}
+              </Link>
+              <Link
+                href={leaders[1] ? `/vote?leader=${leaders[1].id}` : "/vote"}
                 className="rounded-2xl bg-teal-600 px-10 py-5 text-lg font-bold text-white shadow-xl shadow-teal-600/20 transition-all hover:bg-teal-700 active:scale-95"
               >
-                Vote for Rahul Now
-              </button>
+                {leaders[1] ? `Vote for ${leaders[1].name.split(" ")[0]} Now` : "Vote Now"}
+              </Link>
             </div>
           </div>
         </div>
