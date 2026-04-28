@@ -129,14 +129,17 @@ model Vote {
   leaderId  String
   type      VoteType
   createdAt DateTime @default(now())
+  voteDate  DateTime @db.Date @default(dbgenerated("CURRENT_DATE"))
 
   user   User   @relation(fields: [userId], references: [id])
   leader Leader @relation(fields: [leaderId], references: [id])
 
-  @@unique([userId, leaderId]) // prevent duplicate voting
+  @@unique([userId, leaderId, voteDate]) // prevent duplicate voting per day
   @@index([leaderId])
   @@index([userId, createdAt])
   @@index([leaderId, createdAt])
+  @@index([userId, voteDate])
+  @@index([leaderId, voteDate])
 }
 
 model LeaderVoteSummary {
