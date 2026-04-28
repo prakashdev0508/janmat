@@ -49,38 +49,29 @@ export async function POST(request: Request) {
     }
 
     const voteType = choice === "approve" ? VoteType.UPVOTE : VoteType.DOWNVOTE;
+    const now = new Date();
+    const voteDate = getUtcDateStart(now);
 
     await prisma.$transaction(async (tx) => {
-      const existingVote = await tx.vote.findUnique({
-        where: {
-          userId_leaderId: {
-            userId: user.id,
-            leaderId,
-          },
-        },
+      const existingVoteToday = await tx.vote.findFirst({
+        where: { userId: user.id, leaderId, voteDate },
         select: {
           createdAt: true,
           type: true,
         },
       });
 
-      const voteCreatedAt = existingVote?.createdAt ?? new Date();
+      if (existingVoteToday) {
+        throw new Error("DUPLICATE_VOTE_TODAY");
+      }
 
-      await tx.vote.upsert({
-        where: {
-          userId_leaderId: {
-            userId: user.id,
-            leaderId,
-          },
-        },
-        create: {
+      await tx.vote.create({
+        data: {
           userId: user.id,
           leaderId,
           type: voteType,
-          createdAt: voteCreatedAt,
-        },
-        update: {
-          type: voteType,
+          createdAt: now,
+          voteDate,
         },
       });
 
@@ -117,7 +108,6 @@ export async function POST(request: Request) {
         },
       });
 
-      const voteDate = getUtcDateStart(voteCreatedAt);
       const dailyTotals = await tx.vote.groupBy({
         by: ["type"],
         where: {
@@ -162,6 +152,12 @@ export async function POST(request: Request) {
 
     return NextResponse.json({ success: true });
   } catch (error) {
+    if (error instanceof Error && error.message === "DUPLICATE_VOTE_TODAY") {
+      return NextResponse.json(
+        { error: "You have already voted for this leader today. Please try again tomorrow." },
+        { status: 409 },
+      );
+    }
     const message = error instanceof Error ? error.message : "Unknown error";
     return NextResponse.json({ error: message }, { status: 500 });
   }
