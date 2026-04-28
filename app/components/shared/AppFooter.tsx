@@ -46,7 +46,7 @@ export function AppFooter({
                 <BarChart3 className="h-5 w-5 text-white" />
               </div>
               <span className="text-xl font-bold tracking-tighter text-slate-900">
-                Jan<span className="text-teal-600">Mat</span>
+                Jann<span className="text-teal-600">Mat</span>
               </span>
             </div>
             <p className="mb-6 text-sm leading-relaxed font-medium text-slate-500">
@@ -168,7 +168,7 @@ export function AppFooter({
         </div>
 
         <div className="flex flex-col items-center justify-between gap-4 border-t border-slate-100 pt-8 text-xs font-bold tracking-wider text-slate-400 uppercase md:flex-row">
-          <p>© 2024 JanMat Platforms. Independent &amp; Non-Official.</p>
+          <p>© 2024 JannMat Platforms. Independent &amp; Non-Official.</p>
           <div className="flex gap-6">
             <Link href={termsHref} className="transition-colors hover:text-slate-900">
               Terms of Service

@@ -13,7 +13,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "JanMat",
+  title: "JannMat",
   description: "The Real-Time Pulse of Indian Democracy",
 };
 

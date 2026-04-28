@@ -1,8 +1,13 @@
 import type {
+  AccountSecurity,
+  CivicPreferences,
+  DataManagement,
   DashboardData,
   DashboardSettingToggle,
   DashboardUserProfile,
   FavoriteLeader,
+  PersonalInformation,
+  ProfileStatItem,
   RecommendationLeader,
   RecentVoteItem,
   StreakDay,
@@ -18,6 +23,119 @@ export const dashboardUserProfile: DashboardUserProfile = {
   approvalRate: 88,
   lastVoteLabel: "2h ago",
   avatarUrl: "https://api.dicebear.com/7.x/avataaars/svg?seed=Priya",
+};
+
+export const profileStats: ProfileStatItem[] = [
+  {
+    id: "total-votes",
+    label: "Total Votes Cast",
+    value: "1,248",
+    icon: "vote",
+    tone: "teal",
+  },
+  {
+    id: "streak",
+    label: "Voting Streak",
+    value: "15 Days",
+    icon: "streak",
+    tone: "orange",
+  },
+  {
+    id: "favorites",
+    label: "Favorite Leaders",
+    value: "12",
+    icon: "favorites",
+    tone: "emerald",
+  },
+  {
+    id: "active-days",
+    label: "Days Active",
+    value: "342",
+    icon: "activeDays",
+    tone: "slate",
+  },
+];
+
+export const personalInformation: PersonalInformation = {
+  fullName: "Priya Sharma",
+  email: "priya.sharma@example.com",
+  phone: "+91 98765 43210",
+  district: "Mumbai North, Maharashtra",
+  bio: "Civic-minded voter who follows governance, infrastructure, and transparency updates.",
+  emailVerified: true,
+};
+
+export const civicPreferences: CivicPreferences = {
+  issueInterests: [
+    "Infrastructure",
+    "Education",
+    "Healthcare",
+    "Women Safety",
+    "Jobs & Economy",
+    "Digital Governance",
+  ],
+  digestFrequency: "weekly",
+  toggles: [
+    {
+      id: "anonymous-votes",
+      label: "Anonymous Votes",
+      description: "Detach your identity from vote events in public-facing summaries.",
+      enabled: true,
+    },
+    {
+      id: "sentiment-alerts",
+      label: "Sentiment Alerts",
+      description: "Get notified when leader popularity shifts significantly in your region.",
+      enabled: true,
+    },
+    {
+      id: "data-sharing",
+      label: "Data Sharing",
+      description: "Share anonymized usage data to improve regional political insights.",
+      enabled: false,
+    },
+  ],
+};
+
+export const accountSecurity: AccountSecurity = {
+  twoFactorEnabled: true,
+  lastLoginLabel: "Today, 10:24 AM",
+  sessions: [
+    {
+      id: "session-current",
+      device: "Windows PC",
+      browser: "Chrome",
+      location: "Mumbai",
+      lastActive: "Current session",
+      current: true,
+    },
+    {
+      id: "session-mobile",
+      device: "iPhone 13",
+      browser: "Safari",
+      location: "Mumbai",
+      lastActive: "Last active 2h ago",
+      current: false,
+    },
+  ],
+};
+
+export const dataManagement: DataManagement = {
+  actions: [
+    {
+      id: "download-data",
+      title: "Download My Data",
+      description: "All profile and preference information.",
+      icon: "download",
+    },
+    {
+      id: "export-history",
+      title: "Export Voting History",
+      description: "Detailed log of your participation.",
+      icon: "export",
+    },
+  ],
+  deleteWarning: "This action is permanent and cannot be undone.",
 };
 
 export const recommendationLeaders: RecommendationLeader[] = [
@@ -103,6 +221,11 @@ export const settingsToggles: DashboardSettingToggle[] = [
 
 export const fallbackDashboardData: DashboardData = {
   userProfile: dashboardUserProfile,
+  profileStats,
+  personalInformation,
+  civicPreferences,
+  accountSecurity,
+  dataManagement,
   recommendationLeaders,
   favoriteLeaders,
   recentVotes,

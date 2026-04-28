@@ -1,5 +1,6 @@
 import { VoteConfirmationPage } from "../../components/vote-confirmation/VoteConfirmationPage";
 import type { VoteChoice, VoteReceipt } from "../../components/vote-confirmation/types";
+import { prisma } from "@/lib/prisma";
 
 type VoteConfirmationRoutePageProps = {
   searchParams?: Promise<Record<string, string | string[] | undefined>>;
@@ -28,11 +29,17 @@ export default async function VoteConfirmationRoutePage({
   const choiceParam = getSingleValue(params.choice);
   const choice: VoteChoice = choiceParam === "disapprove" ? "disapprove" : "approve";
   const referenceSuffix = `${leaderId}-${choice}`.toUpperCase();
+  const leader = await prisma.leader.findUnique({
+    where: { id: leaderId },
+    select: { name: true },
+  });
+  const resolvedLeaderName =
+    leader?.name ?? leaderNameById[leaderId] ?? "Unknown Leader";
 
   const receipt: VoteReceipt = {
     referenceId: `JM-${referenceSuffix}`,
     leaderId,
-    leaderName: leaderNameById[leaderId] ?? "Narendra Modi",
+    leaderName: resolvedLeaderName,
     choice,
     submittedAtLabel: "Just now",
   };

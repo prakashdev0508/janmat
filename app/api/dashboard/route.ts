@@ -134,7 +134,9 @@ export async function GET() {
     const streak = getStreakDays(userVotes.map((vote) => vote.createdAt));
 
     const data: DashboardData = {
+      ...fallbackDashboardData,
       userProfile: {
+        ...fallbackDashboardData.userProfile,
         id: user.id,
         name: user.displayName || user.name || authUser.email || "LiveVotes User",
         location: latestVote?.leader.state?.name

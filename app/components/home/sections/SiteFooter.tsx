@@ -31,7 +31,7 @@ export function SiteFooter({ groups }: { groups: FooterGroup[] }) {
                 <BarChart3 className="h-4 w-4" />
               </div>
               <span className="text-xl font-bold tracking-tighter text-slate-900">
-                Jan<span className="text-teal-600">Mat</span>
+                Jann<span className="text-teal-600">Mat</span>
               </span>
             </div>
             <p className="mb-6 text-sm leading-relaxed font-medium text-slate-500">
@@ -88,7 +88,7 @@ export function SiteFooter({ groups }: { groups: FooterGroup[] }) {
         </div>
 
         <div className="flex flex-col items-center justify-between gap-4 border-t border-slate-100 pt-8 text-xs font-bold tracking-wider text-slate-400 uppercase md:flex-row">
-          <p>© 2024 JanMat Platforms. Independent & Non-Official.</p>
+          <p>© 2024 JannMat Platforms. Independent & Non-Official.</p>
           <div className="flex gap-6">
             <Link href="/insights" className="transition-colors hover:text-slate-900">
               Terms of Service
