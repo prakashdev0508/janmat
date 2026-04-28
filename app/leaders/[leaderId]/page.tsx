@@ -1,6 +1,10 @@
 import { notFound } from "next/navigation";
+import type { Metadata } from "next";
 import { LeaderProfilePage } from "../../components/leader-profile/LeaderProfilePage";
 import { getLeaderProfileData } from "../../components/leader-profile/leaderProfileData";
+import { seoMetadata } from "../../seo/metadata";
+
+export const metadata: Metadata = seoMetadata.leaderProfile;
 
 type LeaderPageProps = {
   params: Promise<{ leaderId: string }>;

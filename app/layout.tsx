@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
+import { seoMetadata } from "./seo/metadata";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -12,10 +13,7 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
-export const metadata: Metadata = {
-  title: "JannMat",
-  description: "The Real-Time Pulse of Indian Democracy",
-};
+export const metadata: Metadata = seoMetadata.root;
 
 export default function RootLayout({
   children,
