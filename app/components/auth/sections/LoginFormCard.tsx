@@ -48,14 +48,14 @@ export function LoginFormCard() {
           <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#0d9488] text-white">
             <Vote className="h-5 w-5" />
           </div>
-          <span className="text-2xl font-extrabold tracking-tight text-[#1e293b]">JanMat</span>
+          <span className="text-2xl font-extrabold tracking-tight text-[#1e293b]">JannMat</span>
         </Link>
       </div>
 
       <div className="w-full max-w-md">
         <div className="rounded-4xl border border-[#e2e8f0] bg-white p-8 shadow-xl sm:p-12">
           <header className="mb-10 text-center lg:text-left">
-            <h2 className="mb-2 text-3xl font-bold text-[#1e293b]">Login to JanMat</h2>
+            <h2 className="mb-2 text-3xl font-bold text-[#1e293b]">Login to JannMat</h2>
             <p className="text-[#64748b]">Continue with your Google account to start voting.</p>
           </header>
 

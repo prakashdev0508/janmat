@@ -15,7 +15,7 @@ export function HowItWorksSection({ steps }: { steps: StepItem[] }) {
         <div className="mb-16 text-center">
           <h2 className="mb-4 text-3xl font-bold text-slate-900">How It Works</h2>
           <p className="mx-auto max-w-2xl font-medium text-slate-600">
-            JanMat isn&apos;t an election, it&apos;s a daily sentiment tracker
+            JannMat isn&apos;t an election, it&apos;s a daily sentiment tracker
             that reflects the evolving will of the people.
           </p>
         </div>

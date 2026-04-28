@@ -10,6 +10,63 @@ export interface DashboardUserProfile {
   avatarUrl: string;
 }
 
+export interface ProfileStatItem {
+  id: string;
+  label: string;
+  value: string;
+  icon: "vote" | "streak" | "favorites" | "activeDays";
+  tone: "teal" | "orange" | "emerald" | "slate";
+}
+
+export interface PersonalInformation {
+  fullName: string;
+  email: string;
+  phone: string;
+  district: string;
+  bio: string;
+  emailVerified: boolean;
+}
+
+export interface PreferenceToggle {
+  id: string;
+  label: string;
+  description: string;
+  enabled: boolean;
+}
+
+export interface CivicPreferences {
+  issueInterests: string[];
+  digestFrequency: "weekly" | "monthly" | "quarterly" | "never";
+  toggles: PreferenceToggle[];
+}
+
+export interface ActiveSession {
+  id: string;
+  device: string;
+  browser: string;
+  location: string;
+  lastActive: string;
+  current: boolean;
+}
+
+export interface AccountSecurity {
+  twoFactorEnabled: boolean;
+  lastLoginLabel: string;
+  sessions: ActiveSession[];
+}
+
+export interface DataActionItem {
+  id: string;
+  title: string;
+  description: string;
+  icon: "download" | "export";
+}
+
+export interface DataManagement {
+  actions: DataActionItem[];
+  deleteWarning: string;
+}
+
 export interface RecommendationLeader {
   id: string;
   name: string;
@@ -49,6 +106,11 @@ export interface DashboardSettingToggle {
 
 export interface DashboardData {
   userProfile: DashboardUserProfile;
+  profileStats: ProfileStatItem[];
+  personalInformation: PersonalInformation;
+  civicPreferences: CivicPreferences;
+  accountSecurity: AccountSecurity;
+  dataManagement: DataManagement;
   recommendationLeaders: RecommendationLeader[];
   favoriteLeaders: FavoriteLeader[];
   recentVotes: RecentVoteItem[];

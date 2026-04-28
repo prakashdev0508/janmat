@@ -10,7 +10,7 @@ export function LoginBrandPanel() {
           <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#0d9488] text-white shadow-lg shadow-teal-500/20">
             <Vote className="h-5 w-5" />
           </div>
-          <span className="text-2xl font-extrabold tracking-tight text-[#1e293b]">JanMat</span>
+          <span className="text-2xl font-extrabold tracking-tight text-[#1e293b]">JannMat</span>
         </Link>
       </div>
 

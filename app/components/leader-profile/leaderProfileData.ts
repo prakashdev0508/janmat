@@ -158,7 +158,7 @@ export async function getLeaderProfileData(leaderId: string): Promise<LeaderProf
       role: `${leader.type}${leader.constituency ? `, ${leader.constituency}` : ""}`,
       party: partyLabel,
       location: `${stateLabel}, India`,
-      website: "janmat.in",
+      website: "jannmat.in",
       twitter: `@${leader.name.toLowerCase().replace(/\s+/g, "")}`,
       activeSince: String(leader.termStart?.getFullYear() ?? leader.createdAt.getFullYear()),
       avatarUrl: getAvatarUrl(leader.name),

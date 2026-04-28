@@ -16,7 +16,7 @@ export function ConfirmationHero({ receipt }: ConfirmationHeroProps) {
         <p className="mx-auto max-w-2xl text-lg font-medium text-slate-500">
           You successfully <span className="font-bold text-slate-900">{choiceLabel}</span>{" "}
           <span className="font-bold text-teal-600">{receipt.leaderName}</span>. Thanks for
-          participating in JanMat&apos;s transparent sentiment process.
+          participating in JannMat&apos;s transparent sentiment process.
         </p>
       </div>
     </section>

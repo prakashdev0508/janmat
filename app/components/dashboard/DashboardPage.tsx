@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { AppFooter } from "../shared/AppFooter";
 import { AppNav } from "../shared/AppNav";
@@ -78,17 +78,6 @@ export function DashboardPage() {
     };
   }, [requiresLoginOverlay]);
 
-  const interactiveStreakDays = useMemo(() => {
-    const lastActiveDay = dashboardData.streakDays.reduce(
-      (acc, day) => (day.active ? day.day : acc),
-      0,
-    );
-    return dashboardData.streakDays.map((day) => ({
-      ...day,
-      isToday: day.day === lastActiveDay,
-    }));
-  }, [dashboardData.streakDays]);
-
   const handleToggle = (toggleId: string) => {
     setLocalToggles((current) => {
       const next = current.map((toggle) =>
@@ -140,7 +129,7 @@ export function DashboardPage() {
                   <div className="glass-card h-64 animate-pulse rounded-[32px] bg-slate-200" />
                   <div className="glass-card h-56 animate-pulse rounded-[32px] bg-slate-200" />
                 </div>
-                <div className="space-y-8 lg:col-span-4">
+                <div className="space-y-8">
                   <div className="glass-card h-56 animate-pulse rounded-[32px] bg-slate-200" />
                   <div className="glass-card h-36 animate-pulse rounded-[32px] bg-slate-200" />
                   <div className="glass-card h-72 animate-pulse rounded-[32px] bg-slate-200" />
@@ -165,7 +154,7 @@ export function DashboardPage() {
                 <div className="space-y-8 lg:col-span-4">
                   <StreakTrackerPanel
                     streakDaysCount={dashboardData.userProfile.streakDays}
-                    days={interactiveStreakDays}
+                    days={dashboardData.streakDays}
                   />
                   <QuickActionsPanel />
                   <div id="settings-panel">

@@ -84,7 +84,7 @@ export function AppNav({
             <BarChart3 className="h-5 w-5" />
           </div>
           <span className="text-2xl font-bold tracking-tighter text-slate-900">
-            Jan<span className="text-teal-600">Mat</span>
+            Jann<span className="text-teal-600">Mat</span>
           </span>
         </Link>
 
