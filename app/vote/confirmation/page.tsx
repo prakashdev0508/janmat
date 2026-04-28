@@ -1,6 +1,10 @@
 import { VoteConfirmationPage } from "../../components/vote-confirmation/VoteConfirmationPage";
+import type { Metadata } from "next";
 import type { VoteChoice, VoteReceipt } from "../../components/vote-confirmation/types";
+import { seoMetadata } from "../../seo/metadata";
 import { prisma } from "@/lib/prisma";
+
+export const metadata: Metadata = seoMetadata.voteConfirmation;
 
 type VoteConfirmationRoutePageProps = {
   searchParams?: Promise<Record<string, string | string[] | undefined>>;

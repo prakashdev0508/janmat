@@ -1,5 +1,9 @@
 import { ComparisonPage } from "../components/compare/ComparisonPage";
+import type { Metadata } from "next";
 import { getComparePageData } from "@/lib/compare-page-data";
+import { seoMetadata } from "../seo/metadata";
+
+export const metadata: Metadata = seoMetadata.compare;
 
 type ComparePageProps = {
   searchParams?: Promise<Record<string, string | string[] | undefined>>;
