@@ -20,6 +20,63 @@ You can start editing the page by modifying `app/page.tsx`. The page auto-update
 
 This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
 
+## Testing
+
+### Install dependencies
+
+```bash
+npm install
+```
+
+### Run unit + integration tests
+
+```bash
+npm test
+```
+
+### Run tests in watch mode
+
+```bash
+npm run test:watch
+```
+
+### Run coverage
+
+```bash
+npm run test:coverage
+```
+
+### Run e2e smoke tests
+
+```bash
+npx playwright install --with-deps chromium
+npm run test:e2e
+```
+
+### CI-ready verification
+
+```bash
+npm run lint
+npm test
+npm run test:e2e
+```
+
+## A/B Experiments
+
+The app includes a basic experiment framework in `lib/experiments.ts`.
+
+- Experiment registry lives in `EXPERIMENTS`.
+- Variant assignment is deterministic per session key.
+- Assigned variants are persisted in cookies.
+- Exposure events are sent to `POST /api/experiments/exposure`.
+
+To add a new experiment:
+
+1. Add a new definition in `EXPERIMENTS`.
+2. Resolve variant via `getExperimentVariant`.
+3. Persist/read the experiment cookie with `getExperimentCookieName` + `readCookieValue`.
+4. Log exposure through `logExperimentExposure`.
+
 ## Learn More
 
 To learn more about Next.js, take a look at the following resources:
