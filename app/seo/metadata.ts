@@ -1,12 +1,30 @@
 import type { Metadata } from "next";
+import { getSiteUrl } from "@/lib/site-url";
+
+const siteUrl = getSiteUrl();
 
 export const seoMetadata = {
   root: {
+    metadataBase: new URL(siteUrl),
     title: {
       default: "JannMat",
       template: "%s | JannMat",
     },
     description: "The real-time pulse of Indian democracy.",
+    applicationName: "JannMat",
+    openGraph: {
+      type: "website",
+      locale: "en_IN",
+      siteName: "JannMat",
+      url: siteUrl,
+      title: "JannMat — Live political sentiment in India",
+      description: "The real-time pulse of Indian democracy.",
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: "JannMat — Live political sentiment in India",
+      description: "The real-time pulse of Indian democracy.",
+    },
   } satisfies Metadata,
   home: {
     title: "Live Political Sentiment and Leader Ratings in India",

@@ -1,0 +1,29 @@
+# JannMat
+
+> The real-time pulse of Indian democracy. Track live public sentiment, compare leaders, and explore democratic insights across India.
+
+## About
+
+JannMat surfaces live voting sentiment, leader comparisons, regional trends, and analytics for Indian politics. Use the paths below as the canonical entry points for public content.
+
+## Main pages
+
+- [Home](/): Live sentiment overview and entry to the product.
+- [Compare leaders](/compare): Side-by-side leader comparison.
+- [Regions](/regions): Regional political trends across India.
+- [Insights](/insights): Election insights and public opinion analytics.
+- [Vote](/vote): Cast your stance on national leaders (interactive).
+
+## Leader profiles
+
+Leader detail pages live at `/leaders/{id}` where `{id}` is the leader’s stable identifier in JannMat.
+
+## Machine-readable discovery
+
+- [Sitemap](/sitemap.xml): All indexable public URLs, including leader profile pages.
+- [Robots policy](/robots.txt): Crawling rules for search engines and bots.
+
+## Optional
+
+- [Login](/login): Account sign-in (authentication; not primary editorial content).
+- [Dashboard](/dashboard): Signed-in user dashboard (private to authenticated users).

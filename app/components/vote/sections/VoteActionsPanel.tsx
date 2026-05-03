@@ -30,16 +30,18 @@ export function VoteActionsPanel({ leaderId, isLoading = false }: VoteActionsPan
     const cookies = typeof document === "undefined" ? "" : document.cookie;
     const existingVariant = readCookieValue(cookies, getExperimentCookieName(experiment.id));
     const session = ensureExperimentSessionKey(cookies);
-    const variant =
-      existingVariant && experiment.variants.includes(existingVariant)
-        ? existingVariant
-        : getExperimentVariant(experiment, session.key);
+    const variantIds = experiment.variants as readonly string[];
+    const isAssignedVariant =
+      Boolean(existingVariant) && variantIds.includes(existingVariant as string);
+    const variant = isAssignedVariant
+      ? (existingVariant as (typeof experiment.variants)[number])
+      : getExperimentVariant(experiment, session.key);
 
     return {
       experiment,
       variant,
       session,
-      hasExistingVariant: Boolean(existingVariant && experiment.variants.includes(existingVariant)),
+      hasExistingVariant: isAssignedVariant,
     };
   }, []);
 
