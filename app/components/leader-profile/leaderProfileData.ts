@@ -27,6 +27,20 @@ function calculateVoteStats(
   };
 }
 
+/** Lightweight row for `generateMetadata` (one query; avoids full profile work). */
+export async function getLeaderSeoSnapshot(leaderId: string) {
+  return prisma.leader.findUnique({
+    where: { id: leaderId },
+    select: {
+      id: true,
+      name: true,
+      type: true,
+      party: { select: { name: true, shortName: true } },
+      state: { select: { name: true } },
+    },
+  });
+}
+
 export async function getLeaderProfileData(leaderId: string): Promise<LeaderProfileData | null> {
   const today = getUtcDateStart();
   const yesterday = getYesterdayUtcDateStart();

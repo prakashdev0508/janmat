@@ -1,7 +1,17 @@
 "use client";
 
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import {
+  buildCookieString,
+  ensureExperimentSessionKey,
+  EXPERIMENTS,
+  experimentSessionCookieName,
+  getExperimentCookieName,
+  getExperimentVariant,
+  logExperimentExposure,
+  readCookieValue,
+} from "@/lib/experiments";
 
 type VoteActionsPanelProps = {
   leaderId: string;
@@ -15,6 +25,66 @@ export function VoteActionsPanel({ leaderId, isLoading = false }: VoteActionsPan
   const [isSubmitting, setIsSubmitting] = useState<"approve" | "reject" | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [showLoginPrompt, setShowLoginPrompt] = useState(false);
+  const experimentAssignment = useMemo(() => {
+    const experiment = EXPERIMENTS.voteCtaCopyV1;
+    const cookies = typeof document === "undefined" ? "" : document.cookie;
+    const existingVariant = readCookieValue(cookies, getExperimentCookieName(experiment.id));
+    const session = ensureExperimentSessionKey(cookies);
+    const variantIds = experiment.variants as readonly string[];
+    const isAssignedVariant =
+      Boolean(existingVariant) && variantIds.includes(existingVariant as string);
+    const variant = isAssignedVariant
+      ? (existingVariant as (typeof experiment.variants)[number])
+      : getExperimentVariant(experiment, session.key);
+
+    return {
+      experiment,
+      variant,
+      session,
+      hasExistingVariant: isAssignedVariant,
+    };
+  }, []);
+
+  const variant = experimentAssignment.variant;
+
+  useEffect(() => {
+    if (experimentAssignment.session.shouldPersist) {
+      document.cookie = buildCookieString(
+        experimentSessionCookieName,
+        experimentAssignment.session.key,
+        60 * 60 * 24 * 30,
+      );
+    }
+    if (!experimentAssignment.hasExistingVariant) {
+      document.cookie = buildCookieString(
+        getExperimentCookieName(experimentAssignment.experiment.id),
+        experimentAssignment.variant,
+        60 * 60 * 24 * 30,
+      );
+    }
+    void logExperimentExposure({
+      experimentId: experimentAssignment.experiment.id,
+      variant: experimentAssignment.variant,
+      sessionKey: experimentAssignment.session.key,
+    });
+  }, [experimentAssignment]);
+
+  const ctaContent = useMemo(() => {
+    if (variant === "compact_copy") {
+      return {
+        approveTitle: isSubmitting === "approve" ? "Saving..." : "Support",
+        approveDescription: "Back this leader's direction.",
+        rejectTitle: isSubmitting === "reject" ? "Saving..." : "Not Support",
+        rejectDescription: "Signal dissatisfaction with performance.",
+      };
+    }
+    return {
+      approveTitle: isSubmitting === "approve" ? "Submitting..." : "Approve",
+      approveDescription: "I support the current leadership and policies.",
+      rejectTitle: isSubmitting === "reject" ? "Submitting..." : "Disapprove",
+      rejectDescription: "I am unhappy with the current performance.",
+    };
+  }, [isSubmitting, variant]);
 
   async function submitVote(choice: "approve" | "reject") {
     if (!leaderId || isSubmitting) return;
@@ -70,11 +140,9 @@ export function VoteActionsPanel({ leaderId, isLoading = false }: VoteActionsPan
         className="group relative flex flex-col items-center gap-4 overflow-hidden rounded-3xl bg-teal-600 p-8 text-white shadow-xl shadow-teal-600/20 transition-all hover:scale-[1.02] hover:bg-teal-700 active:scale-95"
         >
           <span className="text-5xl transition-transform group-hover:rotate-12">👍</span>
-          <span className="text-2xl font-bold">
-            {isSubmitting === "approve" ? "Submitting..." : "Approve"}
-          </span>
+          <span className="text-2xl font-bold">{ctaContent.approveTitle}</span>
           <p className="text-center text-sm text-teal-50 opacity-80">
-            I support the current leadership and policies.
+            {ctaContent.approveDescription}
           </p>
         </button>
 
@@ -87,11 +155,9 @@ export function VoteActionsPanel({ leaderId, isLoading = false }: VoteActionsPan
           <span className="text-5xl text-orange-600 transition-transform group-hover:-rotate-12">
             👎
           </span>
-          <span className="text-2xl font-bold">
-            {isSubmitting === "reject" ? "Submitting..." : "Disapprove"}
-          </span>
+          <span className="text-2xl font-bold">{ctaContent.rejectTitle}</span>
           <p className="text-center text-sm text-slate-500">
-            I am unhappy with the current performance.
+            {ctaContent.rejectDescription}
           </p>
         </button>
       </div>
@@ -101,7 +167,7 @@ export function VoteActionsPanel({ leaderId, isLoading = false }: VoteActionsPan
       ) : null}
 
       {showLoginPrompt ? (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-900/50 p-4">
+        <div className="fixed inset-0 z-100 flex items-center justify-center bg-slate-900/50 p-4">
           <div className="w-full max-w-md rounded-2xl bg-white p-6 shadow-2xl">
             <h3 className="text-lg font-bold text-slate-900">Login Required</h3>
             <p className="mt-2 text-sm text-slate-600">
